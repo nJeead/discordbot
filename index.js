@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const { PREFIX, TOKEN } = require('./botconfig.json');
+const { PREFIX, TOKEN, RULES } = require('./config.json');
 const client = new Discord.Client({disableMentions: "all"});
 
 /*
@@ -19,13 +19,26 @@ client.on("ready", async () => {
 
 client.on("message", message => {
     if(message.content === 'test'){
-        message.reply(message.author.displayAvatarURL());
+        channel = message.channel;
+        const embed = new Discord.MessageEmbed()
+            .setColor('#00FFFF')
+            .setTitle('Rules')
+            .addField('Rules', RULES)
+            .addField('Admins', '*add admin @s here*');
+
+        channel.send(embed);
     }
 });
 
 client.on("guildMemberAdd", member => {
-    const channel = member.guild.channels.cache.find(channel => channel.name === 'general');
-    channel.send(`${member.user.username} joined the channel!`);
+    const channel = member.guild.channels.cache.find(channel => channel.name === 'welcome');
+    channel.send(`Welcome to the channel ${member.user.username}!`);
+    const embed = new Discord.MessageEmbed()
+        .setColor('#00FFFF')
+        .setTitle('Welcome')
+        .addField('Rules', RULES)
+        .addField('Admins', '*add admin @s here*')
+    channel.send(embed);
 })
 
 client.login(TOKEN);
