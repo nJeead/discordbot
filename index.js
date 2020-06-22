@@ -12,9 +12,6 @@ for(const file of commandfiles){
     client.commands.set(command.name, command);
 }
 /*
-    - server welcome
-        - make embed message to new members in a welcome channel
-        - only bots can write to the welcome channel, not casuals
     - event planner command
         - invite people to stuff
         - set reminders before the event starts
@@ -46,6 +43,8 @@ client.on("guildMemberAdd", member => {
         .setColor('#00FFFF')
         .setTitle('Welcome')
         .addField('Rules', RULES);
+    var role = member.guild.roles.cache.find(role => role.name === "casual");
+    member.roles.add(role);
     channel.send(embed);
 })
 
