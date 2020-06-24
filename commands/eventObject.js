@@ -1,5 +1,6 @@
 // const Discord = require('discord.js');
-const cron = require('cron');
+const cron = require('cron')
+let eventsMap = new Map();
 
 class Event{
     name = "";
@@ -26,15 +27,24 @@ class Event{
     // seconds (optional)
 
     scheduleEvent(date){
-        this._date = date;
-        let sm = new cron.CronJob(date, () => {
-            this._channel.send(`Event Name: ${this.name} at time ${this.time}`);
-            console.log("Scheduled message");
-            sm.stop();
-        });
-        this._task = sm;
-        sm.start()
-        console.log("formatted date: "+ date);
+        try{
+            this._date = date;
+            let sm = new cron.CronJob(date, () => {
+                this._channel.send(`Event Name: ${this.name} at time ${this.time}`);
+                console.log("Scheduled message");
+                sm.stop();
+            });
+            this._task = sm;
+            sm.start()
+
+            eventsMap.set(this.name, this);
+            console.log("Events in map: "+ eventsMap);
+            return true;
+        } catch (e) {
+            this._channel.send("Error: Date and Time is in the past!");
+            return false;
+        }
+
     }
 
     rescheduleEvent(date){
