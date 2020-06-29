@@ -1,4 +1,4 @@
-// const Discord = require('discord.js');
+const Discord = require('discord.js');
 const cron = require('cron')
 let eventsMap = new Map();
 
@@ -15,6 +15,11 @@ class Event{
 
     addGuest(guests){
         this.guestList.push(guests);
+        console.log(this.guestList);
+    }
+
+    get guestList(){
+        return this.guestList;
     }
 
     // * * * * * *
@@ -27,23 +32,37 @@ class Event{
     // seconds (optional)
 
     scheduleEvent(date){
-        try{
+        // try{
             this._date = date;
+
+            let reminder = new Discord.MessageEmbed()
+                .setTitle("Reminder: " + this.name)
+                .setDescription(this._date)
+                .setColor("#00FFFF");
+
+            let mentions = "";
+            for(const i of this.guestList){
+                mentions = mentions + i + "\n";
+            }
+            console.log(mentions);
+            reminder.addField("Invites", mentions);
+
+
             let sm = new cron.CronJob(date, () => {
-                this._channel.send(`Event Name: ${this.name} at time ${this.time}`);
-                console.log("Scheduled message");
+                this._channel.send(reminder);
+                // this._channel.send(`Event Name: ${this.name} at time ${this.time}`);
                 sm.stop();
             });
             this._task = sm;
             sm.start()
 
             eventsMap.set(this.name, this);
-            console.log("Events in map: "+ eventsMap);
+            console.log("Events in map: "+ Array.from(eventsMap.entries()));
             return true;
-        } catch (e) {
-            this._channel.send("Error: Date and Time is in the past!");
-            return false;
-        }
+        // } catch (e) {
+        //     this._channel.send("Error: Date and Time is in the past!");
+        //     return false;
+        // }
 
     }
 
@@ -61,4 +80,4 @@ class Event{
     }
 }
 
-module.exports = { Event }
+module.exports = { name: "eventObject", Event }

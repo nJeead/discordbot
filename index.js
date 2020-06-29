@@ -11,6 +11,8 @@ for(const file of commandfiles){
     const command = require(`./commands/${file}`);
     client.commands.set(command.name, command);
 }
+client.commands.delete("eventObject");
+client.commands.delete("test");
 /*
     - event planner command
         - invite people to stuff

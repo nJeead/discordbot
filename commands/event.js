@@ -5,22 +5,21 @@ const {Event} = require('./eventObject');
 module.exports = {
     name: "event",
     description: "create a new event to invite people to",
-    syntax: [
-            `${PREFIX}event <name> <MM/DD> <HH:mm> <@guest1 @guest2 ...>`,
-            `${PREFIX}event <name> <MM/DD> <hh:mm:pm/am> <@guest1 @guest2 ...>`,
-            `${PREFIX}event <name> <Day (Mon, Tues, ...)> <HH:mm> <@guest1 @guest2 ...>`,
-            `${PREFIX}event <name> <Day (Mon, Tues, ...)> <hh:mm:pm/am> <@guest1 @guest2 ...>`,
-            ],
+    syntax: `${PREFIX}event <name> <MM/DD> <HH:mm> <@guest1 @guest2 ...>` + "\n" +
+            `${PREFIX}event <name> <MM/DD> <hh:mm:pm/am> <@guest1 @guest2 ...>` + "\n" +
+            `${PREFIX}event <name> <Day (Mon, Tues, ...)> <HH:mm> <@guest1 @guest2 ...>`+ "\n" +
+            `${PREFIX}event <name> <Day (Mon, Tues, ...)> <hh:mm:pm/am> <@guest1 @guest2 ...>`+ "\n",
 
     HelpMessage(){
         const syntaxEmbed = new Discord.MessageEmbed()
             .setTitle("Command Options")
             .setColor("#00FFFF")
+        let i = 1;
         for(const s of this.syntax){
-            let i = 1;
             syntaxEmbed.addField(`Option ${i}` , s);
             i++;
         }
+        return syntaxEmbed;
     },
 
     ErrorMessage(error){
@@ -38,7 +37,7 @@ module.exports = {
         let name = args[0];
         let date = args[1].split('/');
         let time = args[2].split(':');
-        let month, day, year, ampm = "";
+        let month, day = "";
 
         if(date.length > 1){
             month = date[0];
@@ -71,14 +70,15 @@ module.exports = {
 
         let now = new Date();
         let eventdate = new Date(now.getFullYear(), (month-1), day, hour, min);
-        // let eventdate = new Date(now.getFullYear(), (date[0]-1), date[1], time[0], time[1]);
 
         let event = new Event(name, time, channel);
-        // let cronFormat = time[1] + " "+ time[0] + " " + date[1]  + " "+ (date[0]-1) + " " + eventdate.getDay();
 
+        event.addGuest(Array.from(message.mentions.users.values()));
+        event.addGuest(Array.from(message.mentions.roles.values()));
 
         if(event.scheduleEvent(eventdate)){
-            channel.send(`${name} is scheduled at ${eventdate} with {mentions}`);
+            channel.send(`${name} successfully scheduled at ${eventdate}`);
+            // channel.send(`${name} is scheduled at ${eventdate} with ${event.guestList}`);
         }
     }
 }
@@ -89,6 +89,12 @@ function getday(day){
         case "Today":
         case "today":
             result = new Date().getDay();
+            break;
+        case "Tomorrow":
+        case "tomorrow":
+            let temp = new Date();
+            temp.setDate(temp.getDate() + 1);
+            result = temp.getDay();
             break;
         case "Sun":
         case "sun":
