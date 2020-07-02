@@ -7,8 +7,9 @@ module.exports ={
     name: "edit",
     description: "change an existing event's properties",
     syntax: `${PREFIX}edit [eventName] [property to change] [change]` + "\n"+
-            "\tProperties: date, time, name, add, remove, end\n" +
-            "Note: add and remove command used for user mentions",
+            "Properties: date, time, name, add, remove, end\n" +
+            "Note: add and remove command used for user mentions\n" +
+            "Date and Time formatting same as EVENT command",
 
     ErrorMessage(error){
         // let i = 1;
@@ -88,41 +89,48 @@ module.exports ={
                 event.addGuest(addmentions);
                 let listString = "";
                 for(const i of event.guestList){
-                    listString = listString + i.toString() + " , ";
+                    listString = listString + i.toString();
                 }
                 channel.send(new Discord.MessageEmbed().setTitle("Success")
                     .addField("Current Invite List", listString));
                 break;
             case "remove":
-                // let notfound = [];
-                // let found = [];
-                // let mentions = Array.from(message.mentions.users.values());
-                // mentions.push(Array.from(message.mentions.roles.values()));
-                //
-                // if(mentions.length <= 1){
-                //     channel.send("Please mention users you want to remove");
-                //     return;
-                // }
-                //
-                // for(const i of mentions){
-                //     let index = event.guestList.indexOf(i);
-                //     if(index !== -1){
-                //         event.guestList.splice(index, 1);
-                //         found.push(i);
-                //     } else {
-                //         notfound.push(i);
-                //     }
-                // }
-                //
-                // let msg = new Discord.MessageEmbed().setTitle(eventName);
-                // if(notfound.length > 0){
-                //     msg.addField("Unable to remove (Not Invited)", notfound);
-                // }
-                // if(found.length > 0){
-                //     msg.addField("Successfully Removed", found);
-                // }
-                // channel.send(msg);
-                // channel.send(`new list: ${event.guestList}`);
+                let notfound = [];
+                let found = [];
+                let mentions = Array.from(message.mentions.users.values());
+                mentions.push(Array.from(message.mentions.roles.values()));
+
+                if(mentions.length <= 1){
+                    channel.send("Please mention users you want to remove");
+                    return;
+                }
+
+                for(const i of mentions){
+                    let index = event.guestList.indexOf(i);
+                    if(index !== -1){
+                        event.guestList.splice(index, 1);
+                        found.push(i);
+                    } else {
+                        notfound.push(i);
+                    }
+                }
+
+                let msg = new Discord.MessageEmbed();
+                msg.setTitle(eventName);
+                if(notfound.length > 0){
+                    try{
+                        msg.addField("Unable to remove (Not Invited)", notfound);
+                    } catch (e) {
+                    }
+                }
+                if(found.length > 0){
+                    try{
+                        msg.addField("Successfully Removed", found);
+                    } catch (e) {
+                    }
+                }
+                channel.send(msg);
+                channel.send(`new list: ${event.guestList}`);
                 break;
             case "end":
                 event._task.stop();

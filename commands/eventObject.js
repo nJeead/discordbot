@@ -7,6 +7,7 @@ class Event{
     time = "";
     guestList = [];
     date = new Date();
+    reminder;
 
     constructor(name, time, channel) {
         this.name = name;
@@ -16,9 +17,13 @@ class Event{
 
     addGuest(guests){
         if(guests.length !== 0){
-
+            for(const i of guests){
+                if(!this.guestList.includes(i)){
+                    this.guestList.push(i);
+                }
+            }
+            this.updateReminder();
         }
-        // console.log(this.guestList);
     }
 
     get guestList(){
@@ -38,25 +43,10 @@ class Event{
         // try{
             this.date = date;
 
-            let reminder = new Discord.MessageEmbed()
-                .setTitle("Reminder: " + this.name)
-                .setDescription(this.date)
-                .setColor("#00FFFF");
-
-            let mentions = "";
-            if(this.guestList.length === 0){
-                mentions = "None";
-            } else {
-                for(const i of this.guestList){
-                    mentions = mentions + i + "\n";
-                }
-            }
-            // console.log(mentions);
-            reminder.addField("Invites", mentions);
-
+            this.updateReminder();
 
             let sm = new cron.CronJob(date, () => {
-                this._channel.send(reminder);
+                this._channel.send(this.reminder);
                 eventsMap.delete(this.name);
                 // this._channel.send(`Event Name: ${this.name} at time ${this.time}`);
                 sm.stop();
@@ -80,6 +70,24 @@ class Event{
     rescheduleEvent(date){
         this._task.stop();
         this.scheduleEvent(date);
+    }
+
+    updateReminder(){
+        this.reminder = new Discord.MessageEmbed()
+            .setTitle("Reminder: " + this.name)
+            .setDescription(this.date)
+            .setColor("#00FFFF");
+
+        let mentions = "";
+        if(this.guestList.length === 0){
+            mentions = "None";
+        } else {
+            for(const i of this.guestList){
+                mentions = mentions + i.toString();
+            }
+        }
+        // console.log(mentions);
+        this.reminder.addField("Invites", mentions);
     }
 
     get name(){
