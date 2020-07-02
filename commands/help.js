@@ -4,9 +4,8 @@ const Discord = require('discord.js');
 module.exports = {
     name: "help",
     description: "provides list of commands and their basic formatting",
-    syntax: [
-        `${PREFIX}help`
-    ],
+    syntax: `${PREFIX}help` + "\n" +
+            `${PREFIX}help [command]`,
     run(message, args) {
         if(args.length === 0){
             let helpMessage = new Discord.MessageEmbed()
@@ -15,7 +14,7 @@ module.exports = {
             for(const i of message.client.commands.values()){
                 helpMessage.addField(`${PREFIX}${i.name}`, i.description + "\n" + i.syntax);
             }
-            message.channel.send(helpMessage);
+            message.author.send(helpMessage);
         } else {
             try{
                 let helpMessage = new Discord.MessageEmbed();
@@ -23,9 +22,9 @@ module.exports = {
                 helpMessage.setTitle(`${PREFIX}${command.name}`)
                     .setDescription(command.description)
                     .addField("Formatting: ", command.syntax);
-                message.channel.send(helpMessage);
+                message.author.send(helpMessage);
             } catch (e) {
-                message.channel.send(`${args} command does not exist`);
+                message.author.send(`${args} command does not exist`);
             }
         }
     }

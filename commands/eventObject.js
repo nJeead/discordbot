@@ -6,6 +6,7 @@ class Event{
     name = "";
     time = "";
     guestList = [];
+    date = new Date();
 
     constructor(name, time, channel) {
         this.name = name;
@@ -14,8 +15,10 @@ class Event{
     }
 
     addGuest(guests){
-        this.guestList.push(guests);
-        console.log(this.guestList);
+        if(guests.length !== 0){
+
+        }
+        // console.log(this.guestList);
     }
 
     get guestList(){
@@ -33,31 +36,39 @@ class Event{
 
     scheduleEvent(date){
         // try{
-            this._date = date;
+            this.date = date;
 
             let reminder = new Discord.MessageEmbed()
                 .setTitle("Reminder: " + this.name)
-                .setDescription(this._date)
+                .setDescription(this.date)
                 .setColor("#00FFFF");
 
             let mentions = "";
-            for(const i of this.guestList){
-                mentions = mentions + i + "\n";
+            if(this.guestList.length === 0){
+                mentions = "None";
+            } else {
+                for(const i of this.guestList){
+                    mentions = mentions + i + "\n";
+                }
             }
-            console.log(mentions);
+            // console.log(mentions);
             reminder.addField("Invites", mentions);
 
 
             let sm = new cron.CronJob(date, () => {
                 this._channel.send(reminder);
+                eventsMap.delete(this.name);
                 // this._channel.send(`Event Name: ${this.name} at time ${this.time}`);
                 sm.stop();
             });
             this._task = sm;
-            sm.start()
-
+            try {
+                sm.start()
+            } catch (e) {
+                this._channel.send("Date and time is in the past");
+            }
             eventsMap.set(this.name, this);
-            console.log("Events in map: "+ Array.from(eventsMap.entries()));
+            // console.log("Events in map: "+ Array.from(eventsMap.entries()));
             return true;
         // } catch (e) {
         //     this._channel.send("Error: Date and Time is in the past!");
@@ -80,4 +91,4 @@ class Event{
     }
 }
 
-module.exports = { name: "eventObject", Event }
+module.exports = { name: "eventObject", Event, eventsMap }
