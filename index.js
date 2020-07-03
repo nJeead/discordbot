@@ -1,6 +1,6 @@
 const fs = require('fs');
 const Discord = require('discord.js');
-const { PREFIX, TOKEN, RULES } = require('./commands/config.json');
+const { PREFIX, RULES } = require('./commands/config.json');
 
 const client = new Discord.Client({disableMentions: "all"});
 client.commands = new Discord.Collection();
@@ -50,4 +50,4 @@ client.on("guildMemberAdd", member => {
     channel.send(embed);
 })
 
-client.login(TOKEN);
+client.login(process.env.token);
