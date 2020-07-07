@@ -4,6 +4,7 @@ const {Event, eventsMap} = require('./eventObject');
 
 module.exports = {
     name: "event",
+    aliases: [""],
     description: "create a new event to invite people to",
     syntax: `${PREFIX}event [name] [MM/DD] [HH:mm] [@guest1 @guest2 ...]` + "\n" +
         `${PREFIX}event [name] [MM/DD] [hh:mm:pm/am] [@guest1 @guest2 ...]` + "\n" +

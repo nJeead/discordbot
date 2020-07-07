@@ -3,6 +3,7 @@ const Discord = require('discord.js');
 
 module.exports = {
     name: "help",
+    aliases: [""],
     description: "provides list of commands and their basic formatting",
     syntax: `${PREFIX}help` + "\n" +
             `${PREFIX}help [command]`,

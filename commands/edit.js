@@ -5,6 +5,7 @@ const {getdate} = require('./event');
 
 module.exports ={
     name: "edit",
+    aliases: [""],
     description: "change an existing event's properties",
     syntax: `${PREFIX}edit [eventName] [property to change] [change]` + "\n"+
             "Properties: date, time, name, add, remove, end\n" +

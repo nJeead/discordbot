@@ -53,7 +53,7 @@ class Event{
             });
             this._task = sm;
             try {
-                sm.start()
+                sm.start();
             } catch (e) {
                 this._channel.send("Date and time is in the past");
             }

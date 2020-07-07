@@ -4,6 +4,7 @@ const cron = require('cron');
 
 module.exports = {
     name: "test",
+    aliases: [""],
     description: "only for development process",
     run(message, args){
         let users = [];

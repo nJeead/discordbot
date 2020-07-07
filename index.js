@@ -1,6 +1,6 @@
 const fs = require('fs');
 const Discord = require('discord.js');
-const { PREFIX, RULES } = require('./commands/config.json');
+const { PREFIX, TOKEN, RULES } = require('./commands/config.json');
 
 const client = new Discord.Client({disableMentions: "all"});
 client.commands = new Discord.Collection();
@@ -12,7 +12,7 @@ for(const file of commandfiles){
     client.commands.set(command.name, command);
 }
 client.commands.delete("eventObject");
-client.commands.delete("test");
+// client.commands.delete("test");
 /*
     - event planner command
         - invite people to stuff
@@ -34,8 +34,12 @@ client.on("message", message => {
     const args = message.content.slice(prefix.length).split(/ +/);
     const command = args.shift().toLowerCase();
 
-    if(!client.commands.has(command)) return;
-    client.commands.get(command).run(message, args);
+    // if(!client.commands.has(command)) return;
+    const cmd = client.commands.get(command)
+        || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(command));
+    if(!cmd) return;
+
+    cmd.run(message, args);
 });
 
 client.on("guildMemberAdd", member => {
@@ -50,4 +54,5 @@ client.on("guildMemberAdd", member => {
     channel.send(embed);
 })
 
-client.login(process.env.token);
+client.login(TOKEN);
+// client.login(process.env.token);
