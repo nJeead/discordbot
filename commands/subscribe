@@ -1,0 +1,22 @@
+const {GCLIENTID, GCLIENTSECRET, GREFRESHTOKEN, RULES, PREFIX} = require('./config.json');
+const Discord = require('discord.js');
+const {google} = require('googleapis');
+
+module.exports = {
+    name: "subscribe",
+    aliases: ["sub"],
+    description: "subscribe to a specific calendar",
+    syntax: `${PREFIX}sub [GCal name] [your email]`,
+    run(message, args) {
+        account.calendarList.list()
+            .then(res => {
+                let found = false;
+                for (const i of res.data.items) {
+                    if (i.summary === "RandomSummary") {
+                        found = true;
+                        message.channel.send("This calendar already exists");
+                    }
+                }
+            }, err => message.channel.send("Something went wrong: " + err))
+    }
+}
