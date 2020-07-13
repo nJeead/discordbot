@@ -1,5 +1,4 @@
 const Discord = require('discord.js');
-const cron = require('cron')
 let eventsMap = new Map();
 
 class Event{
@@ -40,26 +39,26 @@ class Event{
     // seconds (optional)
 
     scheduleEvent(date){
-        // try{
-            this.date = date;
-
-            this.updateReminder();
-
-            let sm = new cron.CronJob(date, () => {
-                this._channel.send(this.reminder);
-                eventsMap.delete(this.name);
-                // this._channel.send(`Event Name: ${this.name} at time ${this.time}`);
-                sm.stop();
-            });
-            this._task = sm;
-            try {
-                sm.start();
-            } catch (e) {
-                this._channel.send("Date and time is in the past");
-            }
-            eventsMap.set(this.name, this);
-            // console.log("Events in map: "+ Array.from(eventsMap.entries()));
-            return true;
+        // // try{
+        //     this.date = date;
+        //
+        //     this.updateReminder();
+        //
+        //     let sm = new cron.CronJob(date, () => {
+        //         this._channel.send(this.reminder);
+        //         eventsMap.delete(this.name);
+        //         // this._channel.send(`Event Name: ${this.name} at time ${this.time}`);
+        //         sm.stop();
+        //     });
+        //     this._task = sm;
+        //     try {
+        //         sm.start();
+        //     } catch (e) {
+        //         this._channel.send("Date and time is in the past");
+        //     }
+        //     eventsMap.set(this.name, this);
+        //     // console.log("Events in map: "+ Array.from(eventsMap.entries()));
+        //     return true;
         // } catch (e) {
         //     this._channel.send("Error: Date and Time is in the past!");
         //     return false;

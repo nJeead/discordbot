@@ -13,7 +13,7 @@ module.exports = {
                 .setTitle("Commands List")
                 .setColor("#00FFFF");
             for(const i of message.client.commands.values()){
-                helpMessage.addField(`${PREFIX}${i.name}`, i.description + "\n" + i.syntax);
+                helpMessage.addField(`${PREFIX}${i.name}`, "*" + i.description + "*" + "\n" + i.syntax);
             }
             message.author.send(helpMessage);
         } else {
@@ -21,7 +21,7 @@ module.exports = {
                 let helpMessage = new Discord.MessageEmbed();
                 let command = message.client.commands.get(args[0]);
                 helpMessage.setTitle(`${PREFIX}${command.name}`)
-                    .setDescription(command.description)
+                    .setDescription("*" + command.description + "*")
                     .addField("Formatting: ", command.syntax);
                 message.author.send(helpMessage);
             } catch (e) {
