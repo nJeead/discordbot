@@ -1,19 +1,20 @@
 const {GCLIENTID, GCLIENTSECRET, GREFRESHTOKEN, RULES, PREFIX} = require('./config.json');
 const Discord = require('discord.js');
 const {google} = require('googleapis');
+const gcal = require('./GCal');
 
 module.exports = {
     name: "test",
     aliases: [""],
     description: "only for development process",
     run(message, args){
-        let temp = args.join(" ");
-        console.log(temp);
-
-        let nameRegex = new RegExp('name: (.*?), ');
-        let timeRegex = new RegExp('start: (.*?),');
-        console.log(temp.match(nameRegex)[1]);
-        console.log(temp.match(timeRegex)[1]);
+        // let temp = args.join(" ");
+        // console.log(temp);
+        //
+        // let nameRegex = new RegExp('name: (.*?), ');
+        // let timeRegex = new RegExp('start: (.*?),');
+        // console.log(temp.match(nameRegex)[1]);
+        // console.log(temp.match(timeRegex)[1]);
 
         // const oAuth2Client = new google.auth.OAuth2(GCLIENTID, GCLIENTSECRET);
         // oAuth2Client.setCredentials({

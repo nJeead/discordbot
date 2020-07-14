@@ -8,11 +8,11 @@ module.exports = {
     aliases: ["ev", "e"],
     description: "create event for a Google Calendar",
     syntax:
-        `${PREFIX}event name: [name], start: [date] [time], ..., @[class/role]` + "\n" +
+        `${PREFIX}event name: [name], start: [date]-[time], ..., @[class/role]` + "\n" +
         `***Date*** ***format***: [MM/DD] or [Day(Mon, Tues, ...)]` + "\n" +
         `***Time*** ***format***: [HH:mm] or [hh:mm:pm/am]`+ "\n" +
         `__**Optional**__ __**parameters**__ (in any order):`+ "\n" +
-        `***end***: [date] [time]` + "\n" +
+        `***end***: [date]-[time]` + "\n" +
         `***description***: [string without commas]` + "\n" +
         `***location***: [string without commas]` + "\n" +
         `***attendees***: [email(s) separated by spaces]`,
@@ -29,9 +29,9 @@ module.exports = {
     },
 
     getParam(args, param){
-        let regex = new RegExp(`${param}: (.*?),`);
+        let regex = new RegExp(`${param}:( ?)(.*?)([,]|$|\\s)`, 'i');
         try {
-            return args.match(regex)[1];
+            return args.match(regex)[2];
         } catch (e) {
             return null;
         }
@@ -46,56 +46,80 @@ module.exports = {
         let end = this.getParam(joined, "end");
         let description = this.getParam(joined, "description");
         let location = this.getParam(joined, "location");
-        let attendees = this.getParam(joined, "attendees");
 
-        console.log(name, start, end, description, location, attendees);
+        if(!name && !start) {
+            channel.send("'name: [eventName]' and 'start: [date]-[time]' missing. Please try again");
+            return;
+        }
+        if(!name) {
+            channel.send("'name: [eventName]' missing. Please try again");
+            return;
+        }
+        if(!start){
+            channel.send("'start: [date]-[time]' missing. Please try again");
+            return;
+        }
+        if(!message.mentions.roles.first()){
+            channel.send("Please select a calendar by adding @[class/role] to the command")
+            return;
+        }
 
-        // if (args.length < 3) {
-        //     channel.send(this.ErrorMessage("Not Enough Arguments"));
-        //     return;
-        // }
-        // if(message.mentions.roles.size < 1){
-        //     channel.send("Please mention role calendar for event to be added to");
-        //     return;
-        // }
-        //
-        // if (!gcal.gcalmap.get(message.mentions.roles.first())) {
-        //     channel.send(`Calendar does not exist for this role, please check role or use ${PREFIX}request to request a role.`);
-        //     return;
-        // }
-        //
-        // let date = args[1].split('/');
-        // let month, day = "";
-        // let temp = this.getdate(date, channel);
-        // month = temp[0];
-        // day = temp[1];
-        //
-        // let time = args[2].split(':');
-        // let hour = time[0];
-        // let min = time[1];
-        // try {
-        //     if (((time[2] === "pm") || (time[2] === "PM")) && parseInt(hour) <= 12) {
-        //         hour = parseInt(hour) + 12;
-        //     }
-        // } catch (e) {
-        // }
-        //
-        //
-        // let now = new Date();
-        // let eventdate = new Date(now.getFullYear(), (month - 1), day, hour, min);
-        // if(eventdate.toString() === "Invalid Date"){
-        //     channel.send(this.ErrorMessage("Invalid Date"));
-        //     return;
-        // }
-        // let event = new Event(name, time, channel);
-        //
-        // event.addGuest(Array.from(message.mentions.users.values()));
-        // event.addGuest(Array.from(message.mentions.roles.values()));
-        //
-        // if (event.scheduleEvent(eventdate)) {
-        //     channel.send(`${name} successfully scheduled at ${eventdate}`);
-        //     // channel.send(`${name} is scheduled at ${eventdate} with ${event.guestList}`);
-        // }
+        const calID = gcal.gcalmap.get(message.mentions.roles.first());
+        if(!calID){
+            channel.send(`Calendar for specified role does not exist. Please use '${PREFIX}request' to request a calendar for this role`)
+            return;
+        }
+
+        let startDate = this.formatDate(start, channel);
+        let endDate = this.formatDate(end, channel);
+        if(!endDate){
+            endDate = new Date(startDate);
+        }
+
+        const event = {
+            summary: name,
+            start: {
+                dateTime: startDate,
+                timeZone: 'America/Chicago',
+            },
+            end: {
+                dateTime: endDate,
+                timeZone: 'America/Chicago',
+            },
+            description: description,
+            location: location,
+            sendNotification: true
+        }
+
+        gcal.addEvent(calID, event, channel);
+
+    },
+    formatDate(input, channel){
+        if(!input) return null;
+        let splitStart = input.split('-');
+        let date = splitStart[0].split('/');
+        let month = "", day = "";
+        let temp = this.getdate(date, channel);
+        month = temp[0];
+        day = temp[1];
+
+        let time = splitStart[1].split(':');
+        let hour = time[0];
+        let min = time[1];
+        try {
+            if (((time[2] === "pm") || (time[2] === "PM")) && parseInt(hour) <= 12) {
+                hour = parseInt(hour) + 12;
+            }
+        } catch (e) {
+        }
+
+        let now = new Date();
+        let eventdate = new Date(now.getFullYear(), (month - 1), day, hour, min);
+        if(eventdate.toString() === "Invalid Date"){
+            channel.send(this.ErrorMessage("Invalid Date"));
+            return;
+        }
+        return eventdate;
     },
     getdate(date, channel){
         let result = [];

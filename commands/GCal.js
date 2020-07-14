@@ -57,6 +57,15 @@ module.exports = {
                     return "error";
                 }
             )
+    },
+    async addEvent(calID, event, channel){
+        const account = this.getAccount();
+        await account.events.insert({calendarId: calID, resource: event},
+            err => {
+                if (err) return channel.send("Error Creating Event...", err);
+                return channel.send(`Event successfully created`);
+            });
+
     }
 }
 

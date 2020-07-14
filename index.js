@@ -13,6 +13,7 @@ for(const file of commandfiles){
 }
 client.commands.delete("eventObject");
 // client.commands.delete("test");
+client.commands.delete("GCal");
 /*
     - event planner command
         - invite people to stuff
@@ -43,15 +44,15 @@ client.on("message", message => {
 });
 
 client.on("guildMemberAdd", member => {
-    const channel = member.guild.channels.cache.find(channel => channel.name === 'welcome');
-    channel.send(`Welcome to the server, ${member.user.username}!`);
+    // const channel = member.guild.channels.cache.find(channel => channel.name === 'welcome');
+    member.send(`Welcome to the server, ${member.user.username}!`);
     const embed = new Discord.MessageEmbed()
         .setColor('#00FFFF')
         .setTitle('Welcome')
         .addField('Rules', RULES);
     var role = member.guild.roles.cache.find(role => role.name === "casual");
     member.roles.add(role);
-    channel.send(embed);
+    member.send(embed);
 })
 
 client.login(DISCORDTOKEN);

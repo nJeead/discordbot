@@ -9,6 +9,15 @@ module.exports = {
     async run(message, args) {
         const account = gcal.getAccount();
 
+        if(!message.channel.permissionsFor(message.member).has("ADMINISTRATOR",false)){
+            message.channel.send("Sorry, This command is for Administrators only.");
+            return;
+        }
+
+        if(args.length<2){
+            message.channel.send("Please enter required parameters: " + this.syntax);
+        }
+
         let calname = args[0];
         let caldesc = args.join(' ');
         if (!calname) {
@@ -29,14 +38,14 @@ module.exports = {
         if (!await gcal.findCalendar(account, calname)) {
             account.calendars.insert({
                 resource: newcal,
-            }).then(res => {
-                    message.react("👍");
+            }).then(async res => {
+                    await message.react("👍");
+                    gcal.gcalmap.set(message.mentions.roles.first(), await gcal.getCalID(account, calname));
                 },
                 err => {
                     message.channel.send("Something went wrong: " + err);
                     console.error("Error\n", err)
                 });
-            gcal.gcalmap.set(message.mentions.roles.first(), calname);
         } else {
             message.channel.send("Calendar already exists");
         }
