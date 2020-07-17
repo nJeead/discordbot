@@ -1,13 +1,40 @@
+const fs = require('fs');
 const {GCLIENTID, GCLIENTSECRET, GREFRESHTOKEN, RULES, PREFIX} = require('./config.json');
 const Discord = require('discord.js');
 const {google} = require('googleapis');
 const gcal = require('./GCal');
+let temp = require('../gcaldata.json')
 
 module.exports = {
     name: "test",
     aliases: [""],
     description: "only for development process",
-    run(message, args){
+    async run(message, args){
+        // message.mentions.roles.forEach(role => {
+        //     let foundRole = message.guild.roles.cache.find(r => r === role);
+        //     if(foundRole){
+        //         foundRole.delete();
+        //     }
+        // })
+        // message.channel.send("SUCCESS")
+
+        // let map = new Map();
+        // map.set("K1", "V1");
+        // map.set("K2", "V2");
+        // map.set("K3", "V3");
+        //
+        // let mapArr = [];
+        // for(const [k,v] of map){
+        //     mapArr.push([k,v]);
+        // }
+        // await fs.writeFile("./gcaldata.json", JSON.stringify(mapArr), (err => {return err}))
+        //
+        // let m = new Map(temp);
+        // console.log(m);
+
+
+        // let temp = message.guild.roles.cache.find(role => role.name === "casual");
+        // console.log(temp.name);
         // let temp = args.join(" ");
         // console.log(temp);
         //

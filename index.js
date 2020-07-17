@@ -1,6 +1,9 @@
 const fs = require('fs');
 const Discord = require('discord.js');
-const { PREFIX, DISCORDTOKEN, GCLIENTID, GCLIENTSECRET, GREFRESHTOKEN, RULES } = require('./commands/config.json');
+const { PREFIX, DISCORDTOKEN, RULES } = require('./commands/config.json');
+
+let {initgcalmap} = require('./commands/GCal');
+initgcalmap();
 
 const client = new Discord.Client({disableMentions: "all"});
 client.commands = new Discord.Collection();

@@ -3,9 +3,10 @@ const gcal = require('./GCal');
 
 module.exports = {
     name: "newgcal",
-    aliases: ["newcal"],
-    description: "create a new Google calendar",
-    syntax: `${PREFIX}newcal [name] [role association] [description (optional)]`,
+    aliases: ["newcal", "newrole", "ncal"],
+    description: "create a new Google calendar and role",
+    syntax: `${PREFIX}newcal [calendar name] [role name] [description (optional)]` + "\n" +
+            `Note: name can not have spaces, and if only one name is given, both role and calendar will have the same name`,
     async run(message, args) {
         const account = gcal.getAccount();
 
@@ -14,18 +15,20 @@ module.exports = {
             return;
         }
 
-        if(args.length<2){
-            message.channel.send("Please enter required parameters: " + this.syntax);
-        }
-
         let calname = args[0];
+        let rolename = args[1];
         let caldesc = args.join(' ');
-        if (!calname) {
-            message.channel.send("Please enter calendar name!");
+
+        if(!calname){
+            message.channel.send("Please enter: [calendar name] [role name]");
             return;
         }
-        if(!message.mentions.roles.first()){
-            message.channel.send("Please mention role associated with this calendar!");
+        if(!rolename){
+            rolename = calname;
+        }
+
+        if(message.guild.roles.cache.find(role => role.name === rolename)){
+            message.channel.send("This role and calendar already exists!");
             return;
         }
 
@@ -39,11 +42,20 @@ module.exports = {
             account.calendars.insert({
                 resource: newcal,
             }).then(async res => {
+                    let role = await message.guild.roles.create({
+                        data: {
+                            name: rolename,
+                        }
+                    });
+                    const err = gcal.addtoGCalMap(role.id, await gcal.getCalID(account, calname));
+                    if(err){
+                        message.channel.send("Error saving calendar data: " + err);
+                        return;
+                    }
                     await message.react("👍");
-                    gcal.gcalmap.set(message.mentions.roles.first(), await gcal.getCalID(account, calname));
                 },
                 err => {
-                    message.channel.send("Something went wrong: " + err);
+                    message.channel.send("Error creating calendar: " + err);
                     console.error("Error\n", err)
                 });
         } else {

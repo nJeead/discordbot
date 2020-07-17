@@ -8,7 +8,7 @@ module.exports = {
     aliases: ["ev", "e"],
     description: "create event for a Google Calendar",
     syntax:
-        `${PREFIX}event name: [name], start: [date]-[time], ..., @[class/role]` + "\n" +
+        `${PREFIX}event name: [name], start: [date]-[time], cal: [class/role], ...` + "\n" +
         `***Date*** ***format***: [MM/DD] or [Day(Mon, Tues, ...)]` + "\n" +
         `***Time*** ***format***: [HH:mm] or [hh:mm:pm/am]`+ "\n" +
         `__**Optional**__ __**parameters**__ (in any order):`+ "\n" +
@@ -46,6 +46,7 @@ module.exports = {
         let end = this.getParam(joined, "end");
         let description = this.getParam(joined, "description");
         let location = this.getParam(joined, "location");
+        let cal = this.getParam(joined, "cal");
 
         if(!name && !start) {
             channel.send("'name: [eventName]' and 'start: [date]-[time]' missing. Please try again");
@@ -59,12 +60,12 @@ module.exports = {
             channel.send("'start: [date]-[time]' missing. Please try again");
             return;
         }
-        if(!message.mentions.roles.first()){
-            channel.send("Please select a calendar by adding @[class/role] to the command")
-            return;
-        }
+        // if(!message.mentions.roles.first()){
+        //     channel.send("Please select a calendar by adding @[class/role] to the command")
+        //     return;
+        // }
 
-        const calID = gcal.gcalmap.get(message.mentions.roles.first());
+        const calID = gcal.gcalmap.get(message.guild.roles.cache.find(role => role.name === cal).id);
         if(!calID){
             channel.send(`Calendar for specified role does not exist. Please use '${PREFIX}request' to request a calendar for this role`)
             return;
@@ -116,7 +117,10 @@ module.exports = {
         let now = new Date();
         let eventdate = new Date(now.getFullYear(), (month - 1), day, hour, min);
         if(eventdate.toString() === "Invalid Date"){
-            channel.send(this.ErrorMessage("Invalid Date"));
+            channel.send("Invalid Date: " + `${PREFIX}event name: [name], start: [date]-[time], ..., @[class/role]` + "\n" +
+                `***Date*** ***format***: [MM/DD] or [Day(Mon, Tues, ...)]` + "\n" +
+                `***Time*** ***format***: [HH:mm] or [hh:mm:pm/am]`+ "\n"
+            );
             return;
         }
         return eventdate;
@@ -180,7 +184,8 @@ module.exports = {
             }
             let dayOfWeek = dayofweek(date[0]);
             if (dayOfWeek === -1) {
-                channel.send(this.ErrorMessage("Invalid day of the week"));
+                channel.send("Invalid day of the week: " +
+                    `***Date*** ***format***: [MM/DD] or [Day(Mon, Tues, ...)]`);
                 return;
             }
 
