@@ -2,8 +2,8 @@ const fs = require('fs');
 const Discord = require('discord.js');
 const { PREFIX, DISCORDTOKEN, RULES } = require('./commands/config.json');
 
-let {initgcalmap} = require('./commands/GCal');
-initgcalmap();
+// let {initgcalmap} = require('./commands/GCal');
+// initgcalmap();
 
 const client = new Discord.Client({disableMentions: "all"});
 client.commands = new Discord.Collection();
@@ -17,12 +17,6 @@ for(const file of commandfiles){
 client.commands.delete("eventObject");
 // client.commands.delete("test");
 client.commands.delete("GCal");
-/*
-    - event planner command
-        - invite people to stuff
-        - set reminders before the event starts
-        - clickable?
- */
 
 client.on("ready", async () => {
     console.log(`${client.user.username} is online`);

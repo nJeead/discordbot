@@ -3,8 +3,8 @@ const Discord = require('discord.js');
 
 module.exports = {
     name: "request",
-    aliases: ["requestclass"],
-    description: "",
+    aliases: ["requestclass", "req"],
+    description: "a message with the requested class information will be sent to all admins",
     syntax: `${PREFIX}request [course number] [professor] [class description]` + "\n" +
             `Example: ${PREFIX}request EE313 Cuevas Linear Systems and Signals`,
 
@@ -15,9 +15,14 @@ module.exports = {
                 .addField("Formatting", this.syntax));
             return;
         }
-        message.channel.send(`Your request for '${args[0]}' was sent`);
         let requestmessage = new Discord.MessageEmbed()
             .addField(`${message.author.tag} requested:`, `${args.join(" ")}`);
-        message.guild.members.cache.get("675355390988255245").send(requestmessage);
+
+        message.guild.members.cache.forEach(i => {
+            if(message.channel.permissionsFor(i).has("ADMINISTRATOR", false)){
+                i.send(requestmessage).then(r => console.log(r));
+            }
+        })
+        message.react(`👍`).then(r => console.log(r));
     }
 }

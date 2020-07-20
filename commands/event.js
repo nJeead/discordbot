@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 const { PREFIX, RULES } = require('./config.json');
-const {Event, eventsMap} = require('./eventObject');
+// const {Event, eventsMap} = require('./eventObject');
 const gcal = require('./GCal')
 
 module.exports = {
@@ -12,10 +12,10 @@ module.exports = {
         `***Date*** ***format***: [MM/DD] or [Day(Mon, Tues, ...)]` + "\n" +
         `***Time*** ***format***: [HH:mm] or [hh:mm:pm/am]`+ "\n" +
         `__**Optional**__ __**parameters**__ (in any order):`+ "\n" +
-        `***end***: [date]-[time]` + "\n" +
-        `***description***: [string without commas]` + "\n" +
-        `***location***: [string without commas]` + "\n" +
-        `***attendees***: [email(s) separated by spaces]`,
+            `***end***: [date]-[time]` + "\n" +
+            `***description***: [string without spaces or commas]` + "\n" +
+            `***location***: [string without commas]` + "\n" +
+            `***attendees***: [email(s) separated by spaces]`,
 
     HelpMessage() {
         return new Discord.MessageEmbed()
@@ -59,6 +59,9 @@ module.exports = {
         if(!start){
             channel.send("'start: [date]-[time]' missing. Please try again");
             return;
+        }
+        if(!cal){
+            channel.send("'cal: [calendar/role]' missing. Please try again");
         }
         // if(!message.mentions.roles.first()){
         //     channel.send("Please select a calendar by adding @[class/role] to the command")

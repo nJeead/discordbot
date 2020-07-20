@@ -4,7 +4,7 @@ const gcal = require('./GCal');
 module.exports = {
     name: "newgcal",
     aliases: ["newcal", "newrole", "ncal"],
-    description: "create a new Google calendar and role",
+    description: "create a new Google calendar and role ***(ADMIN ONLY)***",
     syntax: `${PREFIX}newcal [calendar name] [role name] [description (optional)]` + "\n" +
             `Note: name can not have spaces, and if only one name is given, both role and calendar will have the same name`,
     async run(message, args) {

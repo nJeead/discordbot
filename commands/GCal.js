@@ -3,16 +3,25 @@ const Discord = require('discord.js');
 const {GCLIENTID, GCLIENTSECRET, GREFRESHTOKEN, RULES, PREFIX} = require('./config.json');
 const {google} = require('googleapis');
 
+let gcaldata = require('../gcaldata.json');
+
 let gcalmap; // key: roleID, val: calID
+if (gcaldata) {
+    gcalmap = new Map(gcaldata);
+} else {
+    gcalmap = new Map();
+}
 
 module.exports = {
-    gcalmap,
-    initgcalmap() {
-        let gcaldata = require('../gcaldata.json');
-        if (gcaldata) {
-            gcalmap = new Map(gcaldata);
-        }
-    },
+    gcalmap, // key: roleID, val: calID
+    // initgcalmap() {
+    //     let gcaldata = require('../gcaldata.json');
+    //     if (gcaldata) {
+    //         gcalmap = new Map(gcaldata);
+    //     } else {
+    //         gcalmap = new Map();
+    //     }
+    // },
     getAccount() {
         const oAuth2Client = new google.auth.OAuth2(GCLIENTID, GCLIENTSECRET);
         oAuth2Client.setCredentials({
@@ -105,6 +114,14 @@ module.exports = {
                     return err;
                 }));
             })
+        })
+    },
+    async getCalendarEvents(calID, channel){
+        const account = this.getAccount();
+        return await account.events.list({
+            calendarId: calID,
+            orderBy: "startTime",
+            singleEvents: true
         })
     }
 }

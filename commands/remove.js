@@ -5,8 +5,8 @@ const gcal = require('./GCal');
 
 module.exports = {
     name: "remove",
-    aliases: ["rm", "rmv", "delete"],
-    description: "delete a role and calendar",
+    aliases: ["rm", "delete"],
+    description: "delete a role and calendar ***(ADMIN ONLY)***",
     syntax: `${PREFIX}rm [@role]`,
     async run(message, args) {
         if (!message.channel.permissionsFor(message.member).has("ADMINISTRATOR", false)) {
