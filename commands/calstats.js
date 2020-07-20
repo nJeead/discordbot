@@ -47,7 +47,7 @@ module.exports = {
             return;
         }
         const calID = gcal.gcalmap.get(message.guild.roles.cache.find(role => role.name === calName).id);
-        const events = await gcal.getCalendarEvents(calID, message.channel)
+        const events = await gcal.getCalendarEvents(calID)
         if(property.toLowerCase() === "exams"){
             let examlist = new Discord.MessageEmbed().setTitle("Exams").setColor("DARK_RED");
 

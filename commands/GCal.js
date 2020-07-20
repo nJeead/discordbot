@@ -116,7 +116,7 @@ module.exports = {
             })
         })
     },
-    async getCalendarEvents(calID, channel){
+    async getCalendarEvents(calID){
         const account = this.getAccount();
         return await account.events.list({
             calendarId: calID,
