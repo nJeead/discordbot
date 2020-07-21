@@ -1,6 +1,5 @@
 const {PREFIX} = require(`./config.json`);
 const Discord = require(`discord.js`);
-// const {eventsMap} = require(`./eventObject`);
 const {formatDate} = require('./event');
 const gcal = require('./GCal');
 

@@ -1,3 +1,7 @@
+/**
+ * test.js
+ * Used only for quickly testing features during development
+ */
 const fs = require('fs');
 const {GCLIENTID, GCLIENTSECRET, GREFRESHTOKEN, RULES, PREFIX} = require('./config.json');
 const Discord = require('discord.js');
