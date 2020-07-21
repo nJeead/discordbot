@@ -25,7 +25,7 @@ module.exports = {
         let calName = args[0];
 
         if(calName.toLowerCase() === "calendars"){
-            const calendars = await gcal.getCalendarList(message.channel);
+            const calendars = await gcal.getCalendarList();
             let result = new Discord.MessageEmbed().setTitle("Calendars");
             if(calendars.data.items.length <= 1){
                 result.setDescription("No calendars available at the moment");

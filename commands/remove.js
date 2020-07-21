@@ -81,6 +81,7 @@ module.exports = {
             for(const i of events.data.items){
                 if(i.summary === eventName){
                     eventID = i.id;
+                    break;
                 }
             }
             if(!eventID){

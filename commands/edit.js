@@ -1,16 +1,24 @@
 const {PREFIX} = require(`./config.json`);
 const Discord = require(`discord.js`);
-const {eventsMap} = require(`./eventObject`);
-const {getdate} = require('./event');
+// const {eventsMap} = require(`./eventObject`);
+const {formatDate} = require('./event');
+const gcal = require('./GCal');
 
 module.exports ={
     name: "edit",
     aliases: [""],
     description: "change an existing event's properties",
-    syntax: `${PREFIX}edit [eventName] [property to change] [change]` + "\n"+
-            "Properties: date, time, name, add, remove, end\n" +
-            "Note: add and remove command used for user mentions\n" +
-            "Date and Time formatting same as EVENT command",
+    syntax:
+        `${PREFIX}edit cal: [name], event: [name], option: [property], edit: [change]` + "\n" +
+        `***Date*** ***format***: [MM/DD] or [Day(Mon, Tues, ...)]` + "\n" +
+        `***Time*** ***format***: [HH:mm] or [hh:mm:pm/am]`+ "\n" +
+        `__**Properties**__ : [edit format]:`+ "\n" +
+            `***start***: [date]-[time]` + "\n" +
+            `***end***: [date]-[time]` + "\n" +
+            `***startend***: [date]-[time] (makes start and end the same time)` + "\n" +
+            `***description***: [string without commas]` + "\n" +
+            `***location***: [string without commas]` + "\n" +
+            `***name***: [changes event name without commas]`,
 
     ErrorMessage(error){
         // let i = 1;
@@ -23,123 +31,107 @@ module.exports ={
             .setColor("#00FFFF")
             .addField("Formatting Options: ", this.syntax);
     },
+    getParam(args, param){
+        let regex = new RegExp(`${param}:( ?)(.*?)([,]|$)`, 'i');
+        try {
+            return args.match(regex)[2];
+        } catch (e) {
+            return null;
+        }
+    },
+    async run(message, args) {
+        const joined = args.join(" ");
+        let calName = this.getParam(joined, "cal");
+        let eventName = this.getParam(joined, "event");
+        let option = this.getParam(joined, "option");
+        let edit = this.getParam(joined, "edit");
 
-    run(message, args) {
-        // console.log(args);
-        let channel = message.channel;
-        let event = null;
-        let eventName = args[0];
-        if(eventsMap.get(eventName)){
-            event = eventsMap.get(eventName);
-        } else{
-            channel.send("Event does not exist!");
+        let errorMessage = "";
+        if(!calName){
+            errorMessage += "cal: [name], ";
+        }
+        if(!eventName){
+            errorMessage += "event: [name], "
+        }
+        if(!option){
+            errorMessage += "option: [property], "
+        }
+        if(!edit){
+            errorMessage += "edit: [change], "
+        }
+        if(errorMessage.length !== 0 ){
+            message.channel.send("Missing parameter: " + errorMessage);
             return;
         }
-        if (args.length < 2) {
-            message.channel.send(this.ErrorMessage("not enough arguments"));
+
+        const calID = gcal.gcalmap.get(message.guild.roles.cache.find(role => role.name === calName).id);
+        const events = await gcal.getCalendarEvents(calID);
+        let eventID;
+        let eventObj;
+        for(const i of events.data.items){
+            if(i.summary === eventName){
+                eventID = i.id;
+                eventObj = i;
+                break;
+            }
+        }
+
+        if(!eventID){
+            message.channel.send(`Event '${eventName}' could not be found in '${calName}'`);
             return;
         }
-        let prop = args[1].toLowerCase();
-        switch (prop) {
+
+        let resource;
+        switch (option) {
             case "name":
-                let newName = args[2];
-                eventsMap.delete(eventName);
-                eventsMap.set(newName, event);
-                channel.send(`${eventName} changed to ${newName}`);
+                eventObj.summary = edit;
                 break;
-            case "date":
-                let date = args[2].split('/');
-                let month, day;
-
-                let temp = getdate(date);
-                month = temp[0];
-                day = temp[1];
-
-                event._task.stop();
-                event.date.setDate(day);
-                event.date.setMonth(month - 1);
-
-                event.rescheduleEvent(event.date);
-                channel.send(`Date changed to ${event._task.nextDate()}`);
-                break;
-            case "time":
-                let time = args[2].split(':');
-                let hour = time[0];
-                let min = time[1];
+            case "start":
+                let date = formatDate(edit, message.channel);
                 try {
-                    if (((time[2] === "pm") || (time[2] === "PM")) && parseInt(hour) <= 12) {
-                        hour = parseInt(hour) + 12;
-                    }
+                    eventObj.start.dateTime = date;
+                    eventObj.end.dateTime = new Date(eventObj.end.dateTime);
                 } catch (e) {
+                    eventObj.start.date = date;
+                    eventObj.end.date = new Date(eventObj.end.date);
                 }
-
-                event._task.stop();
-                event.date.setHours(hour);
-                event.date.setMinutes(min);
-
-                event.rescheduleEvent(event.date);
-                channel.send(`Time changed to ${event._task.nextDate()}`);
-                break;
-            case "add":
-                let addmentions = Array.from(message.mentions.users.values());
-                addmentions.push(Array.from(message.mentions.roles.values()));
-                if(addmentions.length <= 1){
-                    channel.send("Please mention users you want to add");
-                    return;
-                }
-                event.addGuest(addmentions);
-                let listString = "";
-                for(const i of event.guestList){
-                    listString = listString + i.toString();
-                }
-                channel.send(new Discord.MessageEmbed().setTitle("Success")
-                    .addField("Current Invite List", listString));
-                break;
-            case "remove":
-                let notfound = [];
-                let found = [];
-                let mentions = Array.from(message.mentions.users.values());
-                mentions.push(Array.from(message.mentions.roles.values()));
-
-                if(mentions.length <= 1){
-                    channel.send("Please mention users you want to remove");
-                    return;
-                }
-
-                for(const i of mentions){
-                    let index = event.guestList.indexOf(i);
-                    if(index !== -1){
-                        event.guestList.splice(index, 1);
-                        found.push(i);
-                    } else {
-                        notfound.push(i);
-                    }
-                }
-
-                let msg = new Discord.MessageEmbed();
-                msg.setTitle(eventName);
-                if(notfound.length > 0){
-                    try{
-                        msg.addField("Unable to remove (Not Invited)", notfound);
-                    } catch (e) {
-                    }
-                }
-                if(found.length > 0){
-                    try{
-                        msg.addField("Successfully Removed", found);
-                    } catch (e) {
-                    }
-                }
-                channel.send(msg);
-                channel.send(`new list: ${event.guestList}`);
                 break;
             case "end":
-                event._task.stop();
-                channel.send(`${eventName} has been canceled`);
+                let date1 = formatDate(edit, message.channel);
+                try {
+                    eventObj.start.dateTime = new Date(eventObj.end.dateTime);
+                    eventObj.end.dateTime = date1;
+                } catch (e) {
+                    eventObj.start.date = new Date(eventObj.end.date);
+                    eventObj.end.date = date1;
+                }
+                break;
+            case "startend":
+                let date2 = formatDate(edit, message.channel);
+                try {
+                    eventObj.start.dateTime = date2;
+                    eventObj.end.dateTime = date2;
+                } catch (e) {
+                    eventObj.start.date = date2;
+                    eventObj.end.date = date2;
+                }
+                break;
+            case "description":
+                eventObj.description = edit;
+                break;
+            case "location":
+                eventObj.location = edit;
                 break;
             default:
-                channel.send(this.ErrorMessage("Invalid Property"));
+                message.channel.send(this.ErrorMessage("Invalid Property"));
                 break;
         }
+
+        let account = gcal.getAccount();
+        account.events.update({
+            calendarId: calID,
+            eventId: eventID,
+            resource: eventObj
+        }).then(res => message.react("👍"));
     }
 }

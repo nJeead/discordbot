@@ -82,7 +82,7 @@ module.exports = {
                 return channel.send(`Event successfully created`);
             });
     },
-    async getCalendarList(channel) {
+    async getCalendarList() {
         const account = this.getAccount();
         return await account.calendarList.list()
     },
@@ -116,13 +116,16 @@ module.exports = {
             })
         })
     },
-    async getCalendarEvents(calID){
+    async getCalendarEvents(calID) {
         const account = this.getAccount();
         return await account.events.list({
             calendarId: calID,
             orderBy: "startTime",
             singleEvents: true
         })
-    }
+    },
+    // updateCalendarEvent(calID, eventID, ){
+    //
+    // }
 }
 
