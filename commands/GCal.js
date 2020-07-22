@@ -21,9 +21,14 @@ module.exports = {
     gcalmap, // key: roleID, val: calID
     // authenticate with OAuth2 and get google calendar account details
     getAccount() {
-        const oAuth2Client = new google.auth.OAuth2(GCLIENTID, GCLIENTSECRET);
+        // const oAuth2Client = new google.auth.OAuth2(GCLIENTID, GCLIENTSECRET);
+        // oAuth2Client.setCredentials({
+        //     refresh_token: GREFRESHTOKEN
+        // });
+
+        const oAuth2Client = new google.auth.OAuth2(process.env.GCLIENTID, process.env.GCLIENTSECRET);
         oAuth2Client.setCredentials({
-            refresh_token: GREFRESHTOKEN
+            refresh_token: process.env.GREFRESHTOKEN
         });
         return google.calendar({version: 'v3', auth: oAuth2Client});
     },

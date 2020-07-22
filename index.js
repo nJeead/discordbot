@@ -18,7 +18,7 @@ for(const file of commandfiles){
 
 // delete files that are not commands or commands that are only for testing
 client.commands.delete("eventObject");
-// client.commands.delete("test");
+client.commands.delete("test");
 client.commands.delete("GCal");
 
 // print to console and set bot activity when ready
@@ -60,5 +60,5 @@ client.on("guildMemberAdd", member => {
 })
 
 // connect to discord with token
-client.login(DISCORDTOKEN);
-// client.login(process.env.token);
+// client.login(DISCORDTOKEN);
+client.login(process.env.DISCORDTOKEN).then(r => console.log(r));
