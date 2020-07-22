@@ -15,7 +15,7 @@ module.exports = {
 
         // adds mentioned roles to a user
         message.guild.members.cache.get(message.author.id).roles.add(message.mentions.roles)
-            .then(res => message.react("🔥🔥👍"),
+            .then(res => message.react("👍"),
                     err => message.reply("Nice try, but you don't have permission :) Try again with the correct role(s)"));
     }
 }

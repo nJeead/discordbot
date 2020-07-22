@@ -72,10 +72,10 @@ module.exports = {
      * @param email, email to be added to ACL
      * @returns returns 'done' or 'error'
      */
-    async newSubscription(calname, email) {
+    async newSubscription(calID, email) {
         const account = this.getAccount();
         const req = {
-            calendarId: await this.getCalID(account, calname),
+            calendarId: calID,
             resource: {
                 role: "reader", // read only permission
                 scope: {
@@ -84,15 +84,7 @@ module.exports = {
                 }
             }
         }
-        account.acl.insert(req)
-            .then(res => {
-                    return "done";
-                },
-                err => {
-                    console.error("subscription error: ", err)
-                    return "error";
-                }
-            )
+        return await account.acl.insert(req);
     },
     /**
      * Add a calendar to a specified calendar

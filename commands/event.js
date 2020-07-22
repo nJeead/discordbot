@@ -39,7 +39,7 @@ module.exports = {
         }
     },
 
-    run(message, args) {
+    async run(message, args) {
         const channel = message.channel;
 
         // gather all parameters
@@ -70,20 +70,44 @@ module.exports = {
         }
 
         // get calID from roleID
-        const calID = gcal.gcalmap.get(message.guild.roles.cache.find(role => role.name === cal).id);
+        let calID;
+        try {
+            calID = gcal.gcalmap.get(message.guild.roles.cache.find(role => role.name === cal).id);
+        } catch (e) {
+            message.channel.send("Role does not exist. Please check spelling and try again. _Role names are case sensitive_");
+            return;
+        }
         if (!calID) {
             channel.send(`Calendar for specified role does not exist. Please use '${PREFIX}request' to request a calendar for this role`)
             return;
         }
 
-        // format start and end dates, if no end date is given, it will be the same as the start date
-        let startDate = this.formatDate(start, channel);
-        let endDate = this.formatDate(end, channel);
-        if (!endDate) {
-            endDate = new Date(startDate);
+        let events = await gcal.getCalendarEvents(calID);
+        for(const i of events.date.items){
+            if(i.summary === name){
+                message.channel.send("Event with same name already exists! Please choose another name or edit existing event.");
+                return;
+            }
         }
 
-        // create event resource, to be sent to gAPI
+        // format start and end dates, if no end date is given, it will be the same as the start date
+        let startDate = this.formatDate(start, channel);
+        if(!startDate){
+            message.channel.send("Error getting start date and time: \n" + `${PREFIX}event name: [name], start: [date]-[time], ..., @[class/role]` + "\n" +
+                `***Date*** ***format***: [MM/DD] or [Day(Mon, Tues, ...)]` + "\n" +
+                `***Time*** ***format***: [HH:mm] or [hh:mm:pm/am]` + "\n");
+            return;
+        }
+        let endDate = this.formatDate(end, channel);
+        if (!endDate) {
+            message.channel.send(`No end date given, end date will be same as start date. Use '${PREFIX}edit' to change the end time`)
+            endDate = new Date(startDate);
+        }
+        try {
+            description += `Creator: ${message.author.tag}`
+        } catch (e) {}
+
+            // create event resource, to be sent to gAPI
         const event = {
             summary: name,
             start: {
@@ -100,40 +124,44 @@ module.exports = {
         }
 
         // send to gAPI to add event
-        gcal.addEvent(calID, event, channel)
+        await gcal.addEvent(calID, event, channel)
 
     },
 
     // format date from 12 hour time to Date() object
     formatDate(input, channel) {
-        if (!input) return null;
-        let splitStart = input.split('-');
-        let date = splitStart[0].split('/');
-        let month = "", day = "";
-        let temp = getdate(date, channel);
-        month = temp[0];
-        day = temp[1];
-
-        let time = splitStart[1].split(':');
-        let hour = time[0];
-        let min = time[1];
         try {
-            if (((time[2] === "pm") || (time[2] === "PM")) && parseInt(hour) <= 12) {
-                hour = parseInt(hour) + 12;
-            }
-        } catch (e) {
-        }
+            if (!input) return null;
+            let splitStart = input.split('-');
+            let date = splitStart[0].split('/');
+            let month = "", day = "";
+            let temp = getdate(date, channel);
+            month = temp[0];
+            day = temp[1];
 
-        let now = new Date();
-        let eventdate = new Date(now.getFullYear(), (month - 1), day, hour, min);
-        if (eventdate.toString() === "Invalid Date") {
-            channel.send("Invalid Date: " + `${PREFIX}event name: [name], start: [date]-[time], ..., @[class/role]` + "\n" +
-                `***Date*** ***format***: [MM/DD] or [Day(Mon, Tues, ...)]` + "\n" +
-                `***Time*** ***format***: [HH:mm] or [hh:mm:pm/am]` + "\n"
-            );
-            return;
+            let time = splitStart[1].split(':');
+            let hour = time[0];
+            let min = time[1];
+            try {
+                if (((time[2] === "pm") || (time[2] === "PM")) && parseInt(hour) <= 12) {
+                    hour = parseInt(hour) + 12;
+                }
+            } catch (e) {
+            }
+
+            let now = new Date();
+            let eventdate = new Date(now.getFullYear(), (month - 1), day, hour, min);
+            if (eventdate.toString() === "Invalid Date") {
+                // channel.send("Invalid Date: " + `${PREFIX}event name: [name], start: [date]-[time], ..., @[class/role]` + "\n" +
+                //     `***Date*** ***format***: [MM/DD] or [Day(Mon, Tues, ...)]` + "\n" +
+                //     `***Time*** ***format***: [HH:mm] or [hh:mm:pm/am]` + "\n"
+                // );
+                return null;
+            }
+            return eventdate;
+        } catch (e) {
+            return null;
         }
-        return eventdate;
     },
 }
 // parse day to get Date() object format
@@ -196,9 +224,9 @@ function getdate(date, channel) {
         }
         let dayOfWeek = dayofweek(date[0]);
         if (dayOfWeek === -1) {
-            channel.send("Invalid day of the week: " +
-                `***Date*** ***format***: [MM/DD] or [Day(Mon, Tues, ...)]`);
-            return;
+            // channel.send("Invalid day of the week: " +
+            //     `***Date*** ***format***: [MM/DD] or [Day(Mon, Tues, ...)]`);
+            return null;
         }
 
         let tempDate = new Date();

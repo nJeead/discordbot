@@ -9,20 +9,31 @@ module.exports = {
     syntax: `${PREFIX}rm [@role]` + "\n" +
             `${PREFIX}rm [calendarName] [eventName]`,
     async run(message, args) {
-        if (message.mentions.roles && args.length <= 1) {   // this block is used to remove a calendar and a role
+        if (message.mentions.roles && args.length >= 1) {   // this block is used to remove a calendar and a role
             // check for ADMIN permissions
             if (!message.channel.permissionsFor(message.member).has("ADMINISTRATOR", false)) {
                 message.channel.send("Sorry, This command is for Administrators only.");
                 return;
             }
-            if(!message.mentions.roles.first()){
-                message.channel.send("Please mention the role and calendar you want to delete");
+            if(!message.mentions.roles){
+                message.channel.send("Please mention the role(s) and calendar(s) you want to delete");
                 return;
             }
+
+            let rolesWCal = new Map();
+            let rolesNoCal = new Map();
+            message.mentions.roles.forEach(role => {
+                if(gcal.gcalmap.get(role.id)){
+                    rolesWCal.set(role.id, role);
+                } else {
+                    rolesNoCal.set(role.id, role);
+                }
+            });
+
             // if a mentioned role does not have a calendar associated with it, the sender can decide to still delete the role
-            if(!gcal.gcalmap.get(message.mentions.roles.first().id)){
-                message.channel.send("Role mentioned does not have a calendar associated with it. " +
-                    "Do you still wish to delete it anyway? Reply with yes or no");
+            if(rolesNoCal.size > 0 && rolesWCal.size === 0){
+                message.channel.send("Role(s) mentioned does not have a calendar associated with it. " +
+                    "Do you still wish to delete them anyway? Reply with 'yes' or 'no'");
 
                 // create message collector with the filter for 'yes' or 'no' with a 15 sec timeout
                 const filter = m => m.content.includes("yes") || m.content.includes("no");
@@ -46,35 +57,64 @@ module.exports = {
                 collector.on('end', ms => {
                     console.log("Remove role only command complete");
                 });
-                return;
+
+            } else if (rolesWCal.size > 0 && rolesNoCal.size > 0){ // mix of roles with and without calendars
+                message.channel.send("Some role(s) mentioned have a calendar associated with it and some roles do not. " +
+                    "This will delete all calendars, events, and roles mentioned. Do you still wish to delete them anyway? Reply with 'confirm' or 'cancel'");
+
+                // create message collector with the filter for 'yes' or 'no' with a 15 sec timeout
+                const filter = m => m.content.includes("confirm") || m.content.includes("cancel");
+                const collector = message.channel.createMessageCollector(filter, {time: 15000});
+
+                // when author sends 'yes', the role will be deleted from the server
+                collector.on('collect', m => {
+                    if (m.content === "confirm") {
+                        gcal.deleteCalendar(rolesWCal, message.channel);
+                        message.mentions.roles.forEach(role => {
+                            let foundRole = message.guild.roles.cache.find(r => r === role);
+                            if (foundRole) {
+                                // .catch() sends message if author tries removal of role without the proper permissions
+                                foundRole.delete().catch(reason => {message.channel.send("Missing permissions. Unable to remove role")});
+                            }
+                        });
+                        message.react("👍");
+                    }
+                });
+
+                // after collector times out
+                collector.on('end', ms => {
+                    console.log("Remove mixed role command complete");
+                });
+
+            } else {
+                // if the calendar does exist:
+                message.channel.send("Are you sure you want to delete the selected role(s) and calendar(s)? Deleting calendars " +
+                    "will also delete all events in that calendar. This can not be undone!" +
+                    " Send 'confirm' to confirm your request or 'cancel' to keep the role and calendar (15 sec timeout)");
+
+                // create message collector to confirm or cancel the request
+                const filter = m => m.content.includes("confirm") || m.content.includes("cancel");
+                const collector = message.channel.createMessageCollector(filter, {time: 15000});
+
+                // if author confirms, then calendar is deleted from gcaldate.json, the google calendar, and the role is removed
+                collector.on('collect', m => {
+                    if (m.content === "confirm") {
+                        gcal.deleteCalendar(message.mentions.roles, message.channel);
+                        message.mentions.roles.forEach(role => {
+                            let foundRole = message.guild.roles.cache.find(r => r === role);
+                            if (foundRole) {
+                                foundRole.delete();
+                            }
+                        });
+                        message.react("👍");
+                    }
+                });
+
+                collector.on('end', ms => {
+                    console.log("Remove command complete");
+                });
             }
 
-            // if the calendar does exist:
-            message.channel.send("Are you sure you want to delete the selected role(s) and calendar(s)? Deleting calendars " +
-                "will also delete all events in that calendar. This can not be undone!" +
-                " Send 'confirm' to confirm your request or 'cancel' to keep the role and calendar (15 sec timeout)");
-
-            // create message collector to confirm or cancel the request
-            const filter = m => m.content.includes("confirm") || m.content.includes("cancel");
-            const collector = message.channel.createMessageCollector(filter, {time: 15000});
-
-            // if author confirms, then calendar is deleted from gcaldate.json, the google calendar, and the role is removed
-            collector.on('collect', m => {
-                if (m.content === "confirm") {
-                    gcal.deleteCalendar(message.mentions.roles, message.channel);
-                    message.mentions.roles.forEach(role => {
-                        let foundRole = message.guild.roles.cache.find(r => r === role);
-                        if (foundRole) {
-                            foundRole.delete();
-                        }
-                    });
-                    message.react("👍");
-                }
-            });
-
-            collector.on('end', ms => {
-                console.log("Remove command complete");
-            });
         } else {        // else, this block is used to remove an event from a calendar
             let account = gcal.getAccount();
             let calName = args[0];
