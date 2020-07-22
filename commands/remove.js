@@ -15,7 +15,10 @@ module.exports = {
                 message.channel.send("Sorry, This command is for Administrators only.");
                 return;
             }
-
+            if(!message.mentions.roles.first()){
+                message.channel.send("Please mention the role and calendar you want to delete");
+                return;
+            }
             // if a mentioned role does not have a calendar associated with it, the sender can decide to still delete the role
             if(!gcal.gcalmap.get(message.mentions.roles.first().id)){
                 message.channel.send("Role mentioned does not have a calendar associated with it. " +
