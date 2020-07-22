@@ -9,6 +9,7 @@ module.exports = {
             `${PREFIX}help [command]`,
     run(message, args) {
         if(args.length === 0){
+            // send info on all commands
             let helpMessage = new Discord.MessageEmbed()
                 .setTitle("Commands List")
                 .setColor("#00FFFF");
@@ -17,7 +18,7 @@ module.exports = {
             }
             message.author.send(helpMessage);
         } else {
-            try{
+            try{ // send info on a specific command
                 let helpMessage = new Discord.MessageEmbed();
                 let command = message.client.commands.get(args[0]);
                 helpMessage.setTitle(`${PREFIX}${command.name}`)

@@ -16,6 +16,7 @@ module.exports = {
         `***description***: [string without commas]` + "\n" +
         `***location***: [string without commas]`,
 
+    // send formatted help message
     HelpMessage() {
         return new Discord.MessageEmbed()
             .setTitle("Command Options")
@@ -23,10 +24,12 @@ module.exports = {
             .addField("Formatting Options: ", this.syntax);
     },
 
+    // send formatted error message
     ErrorMessage(error) {
         return this.HelpMessage().setTitle("Error: " + error);
     },
 
+    // parse and return answers to parameters
     getParam(args, param) {
         let regex = new RegExp(`${param}:( ?)(.*?)([,]|$)`, 'i');
         try {
@@ -39,6 +42,7 @@ module.exports = {
     run(message, args) {
         const channel = message.channel;
 
+        // gather all parameters
         const joined = args.join(" ");
         let name = this.getParam(joined, "name");
         let start = this.getParam(joined, "start");
@@ -47,6 +51,7 @@ module.exports = {
         let location = this.getParam(joined, "location");
         let cal = this.getParam(joined, "cal");
 
+        // send errors if missing required parameters
         if (!name && !start) {
             channel.send("'name: [eventName]' and 'start: [date]-[time]' missing. Please try again");
             return;
@@ -63,23 +68,22 @@ module.exports = {
             channel.send("'cal: [calendar/role]' missing. Please try again");
             return;
         }
-        // if(!message.mentions.roles.first()){
-        //     channel.send("Please select a calendar by adding @[class/role] to the command")
-        //     return;
-        // }
 
+        // get calID from roleID
         const calID = gcal.gcalmap.get(message.guild.roles.cache.find(role => role.name === cal).id);
         if (!calID) {
             channel.send(`Calendar for specified role does not exist. Please use '${PREFIX}request' to request a calendar for this role`)
             return;
         }
 
+        // format start and end dates, if no end date is given, it will be the same as the start date
         let startDate = this.formatDate(start, channel);
         let endDate = this.formatDate(end, channel);
         if (!endDate) {
             endDate = new Date(startDate);
         }
 
+        // create event resource, to be sent to gAPI
         const event = {
             summary: name,
             start: {
@@ -95,9 +99,12 @@ module.exports = {
             sendNotification: true
         }
 
-        gcal.addEvent(calID, event, channel);
+        // send to gAPI to add event
+        gcal.addEvent(calID, event, channel)
 
     },
+
+    // format date from 12 hour time to Date() object
     formatDate(input, channel) {
         if (!input) return null;
         let splitStart = input.split('-');
@@ -129,7 +136,7 @@ module.exports = {
         return eventdate;
     },
 }
-
+// parse day to get Date() object format
 function getdate(date, channel) {
     let result = [];
     let month, day;

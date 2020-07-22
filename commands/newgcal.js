@@ -19,6 +19,7 @@ module.exports = {
         let rolename = args[1];
         let caldesc = args.join(' ');
 
+        // send error if parameters not given
         if(!calname){
             message.channel.send("Please enter: [calendar name] [role name]");
             return;
@@ -27,27 +28,30 @@ module.exports = {
             rolename = calname;
         }
 
+        // check if a role exists already
         if(message.guild.roles.cache.find(role => role.name === rolename)){
             message.channel.send("This role and calendar already exists!");
             return;
         }
 
+        // prepare calendar resource for gAPI
         const newcal = {
             summary: calname,
             description: caldesc,
             timeZone: "America/Chicago"
         }
 
-        if (!await gcal.findCalendar(account, calname)) {
-            account.calendars.insert({
+        // wait for API to respond with a success for fail
+        if (!await gcal.findCalendar(account, calname)) { // if the calendar doesnt already exist, continue
+            account.calendars.insert({ // add new calendar to account
                 resource: newcal,
             }).then(async res => {
-                    let role = await message.guild.roles.create({
+                    let role = await message.guild.roles.create({ // create new role in association with that calendar
                         data: {
                             name: rolename,
                         }
                     });
-                    const err = gcal.addtoGCalMap(role.id, await gcal.getCalID(account, calname));
+                    const err = gcal.addtoGCalMap(role.id, await gcal.getCalID(account, calname)); // update map to add new role and calendar
                     if(err){
                         message.channel.send("Error saving calendar data: " + err);
                         return;

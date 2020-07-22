@@ -19,6 +19,7 @@ module.exports ={
             `***location***: [string without commas]` + "\n" +
             `***name***: [changes event name without commas]`,
 
+    // formats an error message as an embed
     ErrorMessage(error){
         // let i = 1;
         // for(const s of this.syntax){
@@ -30,6 +31,7 @@ module.exports ={
             .setColor("#00FFFF")
             .addField("Formatting Options: ", this.syntax);
     },
+    // parses given parameter using RegEx and returns match
     getParam(args, param){
         let regex = new RegExp(`${param}:( ?)(.*?)([,]|$)`, 'i');
         try {
@@ -38,13 +40,16 @@ module.exports ={
             return null;
         }
     },
+
     async run(message, args) {
+        // parse required parameters
         const joined = args.join(" ");
         let calName = this.getParam(joined, "cal");
         let eventName = this.getParam(joined, "event");
         let option = this.getParam(joined, "option");
         let edit = this.getParam(joined, "edit");
 
+        // check for missing parameters and send error message
         let errorMessage = "";
         if(!calName){
             errorMessage += "cal: [name], ";
@@ -63,10 +68,11 @@ module.exports ={
             return;
         }
 
+        // get calID using roleID from server
         const calID = gcal.gcalmap.get(message.guild.roles.cache.find(role => role.name === calName).id);
         const events = await gcal.getCalendarEvents(calID);
         let eventID;
-        let eventObj;
+        let eventObj; // gets copy of event object from google calendar
         for(const i of events.data.items){
             if(i.summary === eventName){
                 eventID = i.id;
@@ -80,17 +86,18 @@ module.exports ={
             return;
         }
 
-        let resource;
+        let resource; // to be sent to gAPI to update an event
+        // changed only the property that was requested
         switch (option) {
             case "name":
                 eventObj.summary = edit;
                 break;
             case "start":
                 let date = formatDate(edit, message.channel);
-                try {
+                try { // if an event has a date and time
                     eventObj.start.dateTime = date;
                     eventObj.end.dateTime = new Date(eventObj.end.dateTime);
-                } catch (e) {
+                } catch (e) { // only has a date
                     eventObj.start.date = date;
                     eventObj.end.date = new Date(eventObj.end.date);
                 }
@@ -126,6 +133,7 @@ module.exports ={
                 break;
         }
 
+        // send request to gAPI to update an event
         let account = gcal.getAccount();
         account.events.update({
             calendarId: calID,

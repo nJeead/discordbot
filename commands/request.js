@@ -15,9 +15,11 @@ module.exports = {
                 .addField("Formatting", this.syntax));
             return;
         }
+
         let requestmessage = new Discord.MessageEmbed()
             .addField(`${message.author.tag} requested:`, `${args.join(" ")}`);
 
+        // search through members and send a DM to all admins
         message.guild.members.cache.forEach(i => {
             if(message.channel.permissionsFor(i).has("ADMINISTRATOR", false)){
                 i.send(requestmessage).then(r => console.log(r));

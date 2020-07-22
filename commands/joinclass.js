@@ -12,6 +12,8 @@ module.exports = {
             message.reply(`Please mention the class(es) you want to join or use ${PREFIX}request to request a class`);
             return;
         }
+
+        // adds mentioned roles to a user
         message.guild.members.cache.get(message.author.id).roles.add(message.mentions.roles)
             .then(res => message.react("🔥🔥👍"),
                     err => message.reply("Nice try, but you don't have permission :) Try again with the correct role(s)"));

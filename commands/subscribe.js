@@ -18,6 +18,8 @@ module.exports = {
             message.channel.send("Please enter your email");
             return;
         }
+
+        // add email to calendar ACL and return if successful or not
         const res = await gcal.newSubscription(calname, email);
         if(res === "done"){
             message.react("👍");

@@ -13,6 +13,7 @@ module.exports = {
             return;
         }
 
+        // removes mentioned roles from a user
         message.member.roles.remove(message.mentions.roles)
             .then(res => message.react("🔥🔥👍"),
                 err => message.reply("Error: " + err));
