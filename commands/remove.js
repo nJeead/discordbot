@@ -5,7 +5,7 @@ const gcal = require('./GCal');
 module.exports = {
     name: "remove",
     aliases: ["rm", "delete"],
-    description: "delete a event or a role and its calendar ***(role and calendar removal for ADMINS ONLY)***",
+    description: "delete a event or a role and its calendar (role and calendar removal for ADMINS ONLY)",
     syntax: `${PREFIX}rm [@role]` + "\n" +
             `${PREFIX}rm [calendarName] [eventName]`,
     async run(message, args) {

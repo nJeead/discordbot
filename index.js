@@ -60,5 +60,5 @@ client.on("guildMemberAdd", member => {
 })
 
 // connect to discord with token
-// client.login(DISCORDTOKEN);
-client.login(process.env.DISCORDTOKEN).then(r => console.log(r));
+client.login(DISCORDTOKEN);
+// client.login(process.env.DISCORDTOKEN).then(r => console.log(r));

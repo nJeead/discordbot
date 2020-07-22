@@ -7,7 +7,7 @@ module.exports = {
     name: "calstats",
     aliases: ["stats", "list"],
     description: "displays stats for a calendar",
-    syntax: "\n" +`${PREFIX}stats [calendar/role] [property] [option]` + "\n" +
+    syntax: `${PREFIX}stats [calendar/role] [property] [option]` + "\n" +
             `${PREFIX}stats calendars (<-displays all available calendars)` + "\n" +
         "__**Properties:**__" + "\n" +
             "\t***due***: all options apply" + "\n" +

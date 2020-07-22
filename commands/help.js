@@ -14,19 +14,27 @@ module.exports = {
                 .setTitle("Commands List")
                 .setColor("#00FFFF");
             for(const i of message.client.commands.values()){
-                helpMessage.addField(`${PREFIX}${i.name}`, "*" + i.description + "*" + "\n" + i.syntax);
+                if(i.name === undefined) continue;
+                helpMessage.addField("```>\t" + `${PREFIX}${i.name}` + "\t\n\t["+ i.aliases +"]\t\t\t```",
+                    "*" + i.description + "*" + "\n" + i.syntax + "\n");
             }
+            // helpMessage += `${PREFIX}${i.name}` + "\n"
+            //     + `[${i.aliases}]` + "\n"
+            //     + `*${i.description}*` + "\n"
+            //     + i.syntax + "\n";
+
             message.author.send(helpMessage);
         } else {
             try{ // send info on a specific command
                 let helpMessage = new Discord.MessageEmbed();
-                let command = message.client.commands.get(args[0]);
+                const command = message.client.commands.get(args[0])
+                    || message.client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(args[0]));
                 helpMessage.setTitle(`${PREFIX}${command.name}`)
                     .setDescription("*" + command.description + "*")
                     .addField("Formatting: ", command.syntax);
-                message.author.send(helpMessage);
+                message.channel.send(helpMessage);
             } catch (e) {
-                message.author.send(`${args} command does not exist`);
+                message.channel.send(`${args} command does not exist`);
             }
         }
     }
