@@ -8,12 +8,12 @@ module.exports = {
     aliases: ["ev", "e"],
     description: "create event for a Google Calendar",
     syntax:
-        `${PREFIX}event name: [name], start: [date]-[time], cal: [class/role], ...` + "\n" +
-        `***Date*** ***format***: [MM/DD] or [Day(Mon, Tues, ...)]` + "\n" +
-        `***Time*** ***format***: [HH:mm] or [hh:mm:pm/am]` + "\n" +
-        `__**Optional parameters**__ (in any order):` + "\n" +
-        `***end***: [date]-[time]` + "\n" +
-        `***description***: [string without commas]` + "\n" +
+        `${PREFIX}event name: [name], start: [date]-[time], cal: [class/role], ...\n` +
+        `***Date*** ***format***: [MM/DD] or [Day(Mon, Tues, ...)]\n` +
+        `***Time*** ***format***: [HH:mm] or [hh:mm:pm/am]\n` +
+        `__**Optional parameters**__ (in any order):\n` +
+        `***end***: [date]-[time]\n` +
+        `***description***: [string without commas]\n` +
         `***location***: [string without commas]`,
 
     // send formatted help message
@@ -83,7 +83,7 @@ module.exports = {
         }
 
         let events = await gcal.getCalendarEvents(calID);
-        for(const i of events.date.items){
+        for(const i of events.data.items){
             if(i.summary === name){
                 message.channel.send("Event with same name already exists! Please choose another name or edit existing event.");
                 return;
@@ -104,7 +104,7 @@ module.exports = {
             endDate = new Date(startDate);
         }
         try {
-            description += `Creator: ${message.author.tag}`
+            description += `\tCreator: ${message.author.tag}`
         } catch (e) {}
 
             // create event resource, to be sent to gAPI
@@ -120,7 +120,14 @@ module.exports = {
             },
             description: description,
             location: location,
-            sendNotification: true
+            reminders: {
+                'useDefault': false,
+                'overrides': [
+                    {method: 'email', minutes: 24 * 60},
+                    {method: 'popup', minutes: 10}
+                ]
+            }
+
         }
 
         // send to gAPI to add event

@@ -9,7 +9,7 @@ module.exports = {
     syntax: `${PREFIX}rm [@role]` + "\n" +
             `${PREFIX}rm [calendarName] [eventName]`,
     async run(message, args) {
-        if (message.mentions.roles && args.length >= 1) {   // this block is used to remove a calendar and a role
+        if (message.mentions.roles.size !== 0 && args.length >= 1) {   // this block is used to remove a calendar and a role
             // check for ADMIN permissions
             if (!message.channel.permissionsFor(message.member).has("ADMINISTRATOR", false)) {
                 message.channel.send("Sorry, This command is for Administrators only.");
@@ -119,11 +119,21 @@ module.exports = {
             let account = gcal.getAccount();
             let calName = args[0];
             let eventName = args[1];
+            if(!eventName || !calName){
+                message.channel.send(`Missing parameters. Format is: '${PREFIX}rm [calendarName] [eventName]'`);
+                return;
+            }
             // get calendarID through the roleID
-            const calID = gcal.gcalmap.get(message.guild.roles.cache.find(role => role.name === calName).id);
+            const role = message.guild.roles.cache.find(role => role.name === calName);
+            if(!role){
+                message.channel.send("Role and calendar do not exist. Please check available calendars and try again.")
+                return;
+            }
+
+            const calID = gcal.gcalmap.get(role.id);
 
             if(!calID){
-                message.channel.send("Calendar does not exist. Please check available calendars and try again.")
+                message.channel.send("Calendar does not exist for this role. Please check available calendars and try again.")
                 return;
             }
 

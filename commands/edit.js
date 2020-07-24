@@ -94,6 +94,12 @@ module.exports ={
                 break;
             case "start":
                 let date = formatDate(edit, message.channel);
+                if(!date){
+                    message.channel.send("Error getting start date and time: [date]-[time]\n" +
+                        `***Date*** ***format***: [MM/DD] or [Day(Mon, Tues, ...)]\n` +
+                        `***Time*** ***format***: [HH:mm] or [hh:mm:pm/am]\n`);
+                    return;
+                }
                 try { // if an event has a date and time
                     eventObj.start.dateTime = date;
                     eventObj.end.dateTime = new Date(eventObj.end.dateTime);
@@ -103,7 +109,13 @@ module.exports ={
                 }
                 break;
             case "end":
-                let date1 = formatDate(edit, message.channel);
+                let date1 = formatDate(edit, message.channel)
+                if(!date1){
+                    message.channel.send("Error getting start date and time: [date]-[time]\n" +
+                        `***Date*** ***format***: [MM/DD] or [Day(Mon, Tues, ...)]\n` +
+                        `***Time*** ***format***: [HH:mm] or [hh:mm:pm/am]\n`);
+                    return;
+                }
                 try {
                     eventObj.start.dateTime = new Date(eventObj.end.dateTime);
                     eventObj.end.dateTime = date1;
@@ -114,6 +126,12 @@ module.exports ={
                 break;
             case "startend":
                 let date2 = formatDate(edit, message.channel);
+                if(!date2){
+                    message.channel.send("Error getting start date and time: [date]-[time]\n" +
+                        `***Date*** ***format***: [MM/DD] or [Day(Mon, Tues, ...)]\n` +
+                        `***Time*** ***format***: [HH:mm] or [hh:mm:pm/am]\n`);
+                    return;
+                }
                 try {
                     eventObj.start.dateTime = date2;
                     eventObj.end.dateTime = date2;

@@ -51,7 +51,16 @@ module.exports = {
         }
 
         // searches through roles to find the roleID then gets calendarID using the roleID
-        const calID = gcal.gcalmap.get(message.guild.roles.cache.find(role => role.name === calName).id);
+        let role = message.guild.roles.cache.find(role => role.name === calName);
+        if(!role){
+            message.channel.send("Role/Calendar does not exist. Please check spelling and try again. *Names are case sensitive*");
+            return;
+        }
+        const calID = gcal.gcalmap.get(role.id);
+        if(!calID){
+            message.channel.send("Calendar for this role does not exist. Please check spelling and try again. *Names are case sensitive*");
+            return;
+        }
         const events = await gcal.getCalendarEvents(calID);             // wait for gAPI to return calendar events
         if(property.toLowerCase() === "exams"){     // lists calendar events that are exams
             let examlist = new Discord.MessageEmbed().setTitle("Exams").setColor("DARK_RED");
@@ -91,7 +100,9 @@ module.exports = {
                     maxDate = null
                     break;
             }
-
+            if(maxDate){
+                maxDate.setHours(24,0,0,0);
+            }
             message.channel.send(this.getEvents(maxDate, events.data.items));
         }
     },
