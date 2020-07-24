@@ -3,10 +3,11 @@ const gcal = require('./GCal');
 
 module.exports = {
     name: "newgcal",
-    aliases: ["newcal", "newrole", "ncal"],
+    aliases: ["newcal", "newrole", "cal"],
     description: "create a new Google calendar and role (ADMIN ONLY)",
-    syntax: `${PREFIX}newcal [calendar name] [role name] [description (optional)]` + "\n" +
-            `Note: name can not have spaces, and if only one name is given, both role and calendar will have the same name`,
+    syntax: `${PREFIX}newcal cal: [calendar name], role: [role name (optional)], description: [description (optional)]` + "\n" +
+            `Note: name can not have spaces, both role and calendar will have the same name`+
+            "```Example: " + `${PREFIX}newcal cal: CalendarName, description: some random description for the calendar` + "```",
     async run(message, args) {
         const account = gcal.getAccount();
 
@@ -14,10 +15,10 @@ module.exports = {
             message.channel.send("Sorry, This command is for Administrators only.");
             return;
         }
-
-        let calname = args[0];
-        let rolename = args[1];
-        let caldesc = args.join(' ');
+        let joined = args.join(" ");
+        let calname = this.getParam(joined, "cal");
+        let rolename = this.getParam(joined, "role");
+        let caldesc = this.getParam(joined, "description");
 
         // send error if parameters not given
         if(!calname){
@@ -65,5 +66,14 @@ module.exports = {
         } else {
             message.channel.send("Calendar already exists");
         }
-    }
+    },
+    getParam(args, param) {
+        let regex = new RegExp(`${param}:( ?)(.*?)([,]|$)`, 'i');
+        try {
+            return args.match(regex)[2];
+        } catch (e) {
+            return null;
+        }
+    },
+
 }

@@ -16,7 +16,8 @@ module.exports = {
             "\t***today***: " + "\n" +
             "\t***tomorrow***: " + "\n" +
             "\t***week***: " + "\n"+
-            "\t***all***: ",
+            "\t***all***: " +
+        "```Example: " + `${PREFIX}stats existingRole due today` + "```",
     async run(message, args){
         if(args.length < 1){
             message.channel.send("Please enter the required parameters: " + this.syntax);

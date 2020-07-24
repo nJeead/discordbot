@@ -5,7 +5,8 @@ module.exports = {
     name: "joinclass",
     aliases: ["joinrole", "join"],
     description: "join a class role",
-    syntax: `${PREFIX}joinclass @{classRole} @{classRole} ...`,
+    syntax: `${PREFIX}joinclass @{classRole} @{classRole} ...` +
+            "```Example: " + `${PREFIX}joinclass @casuals @EE302 @EXISTINGROLE` + "```",
 
     run(message, args) {
         if(message.mentions.roles.size<1){

@@ -7,7 +7,9 @@ module.exports = {
     aliases: ["rm", "delete"],
     description: "delete a event or a role and its calendar (role and calendar removal for ADMINS ONLY)",
     syntax: `${PREFIX}rm [@role]` + "\n" +
-            `${PREFIX}rm [calendarName] [eventName]`,
+            `${PREFIX}rm cal: [calendarName] event: [eventName]`+
+            "```Examples: \n" + `${PREFIX}rm @ExistsingRole\n` +
+            `${PREFIX}rm cal: EE302, event: assignment1`+ "```",
     async run(message, args) {
         if (message.mentions.roles.size !== 0 && args.length >= 1) {   // this block is used to remove a calendar and a role
             // check for ADMIN permissions
@@ -116,11 +118,13 @@ module.exports = {
             }
 
         } else {        // else, this block is used to remove an event from a calendar
-            let account = gcal.getAccount();
-            let calName = args[0];
-            let eventName = args[1];
+            let account = gcal.getAccount()
+            let joined = args.join(" ");
+            let calName = this.getParam(joined, "cal");
+            let eventName = this.getParam(joined, "event");
+
             if(!eventName || !calName){
-                message.channel.send(`Missing parameters. Format is: '${PREFIX}rm [calendarName] [eventName]'`);
+                message.channel.send(`Missing parameters. Format is: '${PREFIX}rm cal: [calendarName], event: [eventName]'`);
                 return;
             }
             // get calendarID through the roleID
@@ -164,6 +168,14 @@ module.exports = {
                 }
                 message.react("👍");
             })
+        }
+    },
+    getParam(args, param) {
+        let regex = new RegExp(`${param}:( ?)(.*?)([,]|$)`, 'i');
+        try {
+            return args.match(regex)[2];
+        } catch (e) {
+            return null;
         }
     }
 }

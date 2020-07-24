@@ -6,7 +6,8 @@ module.exports = {
     name: "subscribe",
     aliases: ["sub"],
     description: "subscribe to a specific role/class calendar",
-    syntax: `${PREFIX}sub [@role] [your email]`,
+    syntax: `${PREFIX}sub [@role] [your email]` +
+            "```Example: " + `${PREFIX}sub @EXISTINGROLE myaddress@example.edu` + "```" ,
     async run(message, args) {
         if(!message.mentions.roles){
             message.channel.send("Please mention the role you would like to subscribe to.")

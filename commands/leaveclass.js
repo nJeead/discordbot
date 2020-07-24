@@ -5,7 +5,8 @@ module.exports = {
     name: "leaveclass",
     aliases: ["leaverole", "leave"],
     description: "remove yourself from a class role",
-    syntax: `${PREFIX}leaveclass @{classRole} @{classRole} ...`,
+    syntax: `${PREFIX}leaverole @{classRole} @{classRole} ...` +
+        "```Example: " + `${PREFIX}leave @casuals @EE302 @EXISTINGROLE` + "```",
 
     run(message, args) {
         if (message.mentions.roles.size < 1) {

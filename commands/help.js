@@ -16,7 +16,7 @@ module.exports = {
             for(const i of message.client.commands.values()){
                 if(i.name === undefined) continue;
                 helpMessage.addField("```>\t" + `${PREFIX}${i.name}` + "\t\n\t["+ i.aliases +"]\t\t\t```",
-                    "*" + i.description + "*" + "\n" + i.syntax + "\n");
+                    `*${i.description}*\n${i.syntax}\n`);
             }
             // helpMessage += `${PREFIX}${i.name}` + "\n"
             //     + `[${i.aliases}]` + "\n"

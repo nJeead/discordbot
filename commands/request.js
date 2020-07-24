@@ -6,7 +6,7 @@ module.exports = {
     aliases: ["requestclass", "req"],
     description: "a message with the requested class information will be sent to all admins",
     syntax: `${PREFIX}request [course number] [professor] [class description]` + "\n" +
-            `Example: ${PREFIX}request EE313 Cuevas Linear Systems and Signals`,
+            "```" + `Example: ${PREFIX}request EE313 Cuevas Linear Systems and Signals` + "```",
 
     run(message, args) {
         if(args.length<1){

@@ -17,7 +17,10 @@ module.exports ={
             `***startend***: [date]-[time] (makes start and end the same time)` + "\n" +
             `***description***: [string without commas]` + "\n" +
             `***location***: [string without commas]` + "\n" +
-            `***name***: [changes event name without commas]`,
+            `***name***: [changes event name without commas]` +
+        "```Examples: \n" + `${PREFIX}edit cal: Some Calendar, event: Some Event, option: start, edit: friday-8:00:pm\n` +
+        `${PREFIX}edit cal: Another Calendar, event: Event2, option: description, edit: this description can have spaces and any character EXCEPT for commas` +
+        "```",
 
     // formats an error message as an embed
     ErrorMessage(error){

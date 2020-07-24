@@ -14,7 +14,10 @@ module.exports = {
         `__**Optional parameters**__ (in any order):\n` +
         `***end***: [date]-[time]\n` +
         `***description***: [string without commas]\n` +
-        `***location***: [string without commas]`,
+        `***location***: [string without commas]` +
+        "```Examples: \n" + `${PREFIX}event name: Some Event, cal: Calendar Name, start: tomorrow-22:00\n` +
+        `${PREFIX}event cal: A Calendar, name: Random Event, start: 1/15-4:00:pm, end: 1/16-4:00:pm, description: this is a description without commas, location: 123 UT Drive` +
+        "```",
 
     // send formatted help message
     HelpMessage() {
