@@ -18,6 +18,8 @@
   "homepage": "https://github.com/nJeead/discordbot#readme",
   "dependencies": {
     "discord.js": "^12.2.0",
-    "googleapis": "^52.1.0"
+    "dotenv": "^8.2.0",
+    "googleapis": "^52.1.0",
+    "pg": "^8.3.0"
   }
 }

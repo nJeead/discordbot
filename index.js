@@ -1,9 +1,8 @@
 const fs = require('fs');
 const Discord = require('discord.js');
 const { PREFIX, DISCORDTOKEN, RULES } = require('./commands/config.json');
-
-// let {initgcalmap} = require('./commands/GCal');
-// initgcalmap();
+const dotenv = require('dotenv');
+dotenv.config();
 
 //create new client and collection of commands
 const client = new Discord.Client({disableMentions: "all"});
@@ -61,4 +60,4 @@ client.on("guildMemberAdd", member => {
 
 // connect to discord with token
 // client.login(DISCORDTOKEN);
-client.login(process.env.DISCORDTOKEN).then(r => console.log(r));
+client.login(process.env.DISCORDTOKEN).then(r => console.log("LogIn Successful"));

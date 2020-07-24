@@ -1,21 +1,52 @@
 /**
  * GCal.js
- * contains functions to work with the google calendar API
+ * contains functions to work with the google calendar API and connect to database
  */
 
-const fs = require('fs');
 const Discord = require('discord.js');
-const {GCLIENTID, GCLIENTSECRET, GREFRESHTOKEN, RULES, PREFIX} = require('./config.json');
+const {RULES, PREFIX} = require('./config.json');
 const {google} = require('googleapis');
+const dotenv = require('dotenv');
+dotenv.config();
 
 // initialize global variable 'gcalmap'
-let gcaldata = require('../gcaldata.json');
-let gcalmap; // contains key: roleID, val: calID
-if (gcaldata) { // if json file is empty, create an empty map
-    gcalmap = new Map(gcaldata);
-} else {
-    gcalmap = new Map();
-}
+let gcalmap = new Map(); // contains key: roleID, val: calID
+
+// connect to Heroku postgres database
+const {Client: dbClient} = require('pg');
+const db = new dbClient({
+    user: process.env.PGUSER,
+    password: process.env.PGPASSWORD,
+    host: process.env.PGHOST,
+    port: 5432,
+    database: process.env.PGDATABASE,
+    // connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
+});
+
+const data_table = "calendarData";
+db.connect()
+    .then(() => console.log("Connection to database successful"))
+    .catch(e => console.error("Connecting to Database ", e))
+    .finally(() => {
+        db.query(`CREATE TABLE IF NOT EXISTS ${data_table}(roleID TEXT, calID TEXT)`)   // create calendarData table if it doesnt exist
+            .then(() => console.log("Table was created/already exists"))
+            .then(()=>{
+                db.query(`SELECT * FROM ${data_table}`)     // get all data from table and put into gcal map
+                    .then(res => {
+                        for(const i of res.rows){
+                            gcalmap.set(i.roleid, i.calendarid);
+                        }
+                        console.log("On startup: ")
+                        console.log(gcalmap);
+                        // db.query(`DELETE FROM ${data_table}`)   // delete everything from data table
+                    })
+                    .catch(err => console.error("Getting data from table ",err));
+            })
+            .catch(err => console.error("Creating table ",err));
+    })
 
 module.exports = {
     gcalmap, // key: roleID, val: calID
@@ -113,13 +144,9 @@ module.exports = {
      */
     addtoGCalMap(roleID, calID) {
         gcalmap.set(roleID, calID);
-        let mapArr = [];
-        for (const [k, v] of gcalmap) {
-            mapArr.push([k, v]);
-        }
-        fs.writeFile("./gcaldata.json", JSON.stringify(mapArr), (err => {
-            return err
-        }));
+        db.query(`INSERT INTO ${data_table}(roleid, calendarid) VALUES ('${roleID}', '${calID}')`)
+            .then(() => console.log(`Added set to db: [${roleID}, ${calID}]`))
+            .catch(err => console.error("Adding to db", err));
     },
     /**
      * deletes all roles and associated calendars from google calendar
@@ -137,15 +164,10 @@ module.exports = {
                 if (err) console.error("Error deleting calendar",err);
                 channel.send("Role(s) and calendar(s) removed"); // send confirmation
                 gcalmap.delete(role.id); // delete role from map
-                // convert map to array
-                let mapArr = [];
-                for (const [k, v] of gcalmap) {
-                    mapArr.push([k, v]);
-                }
-                // update json file
-                fs.writeFile("./gcaldata.json", JSON.stringify(mapArr), (err => {
-                    return err;
-                }));
+                db.query(`DELETE FROM ${data_table} WHERE roleid = '${role.id}'`)
+                    .then(() => console.log(`Deleted set from db: [${role.id}, ${calID}]`))
+                    .catch(err => console.error("Deleting from db", err));
+
             })
         })
     },
