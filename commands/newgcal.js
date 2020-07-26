@@ -6,7 +6,7 @@ module.exports = {
     aliases: ["newcal", "newrole", "cal"],
     description: "create a new Google calendar and role (ADMIN ONLY)",
     syntax: `${PREFIX}newcal cal: [calendar name], role: [role name (optional)], description: [description (optional)]` + "\n" +
-            `Note: name can not have spaces, both role and calendar will have the same name`+
+            `Note: both role and calendar will have the same name if role name is not specified`+
             "```Example: " + `${PREFIX}newcal cal: CalendarName, description: some random description for the calendar` + "```",
     async run(message, args) {
         const account = gcal.getAccount();
