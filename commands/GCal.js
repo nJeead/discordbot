@@ -167,7 +167,6 @@ module.exports = {
                 db.query(`DELETE FROM ${data_table} WHERE roleid = '${role.id}'`)
                     .then(() => console.log(`Deleted set from db: [${role.id}, ${calID}]`))
                     .catch(err => console.error("Deleting from db", err));
-
             })
         })
     },

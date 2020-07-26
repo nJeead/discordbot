@@ -21,10 +21,10 @@ module.exports = {
 
         // search through members and send a DM to all admins
         message.guild.members.cache.forEach(i => {
-            if(message.channel.permissionsFor(i).has("ADMINISTRATOR", false)){
-                i.send(requestmessage).then(r => console.log(r));
+            if(message.channel.permissionsFor(i).has("ADMINISTRATOR", false) && !i.user.bot){
+                i.send(requestmessage).then(r => console.log("Request message sent"), err => console.error("Admin DM", err));
             }
         })
-        message.react(`👍`).then(r => console.log(r));
+        message.react(`👍`).then(r => console.log("Reaction sent"));
     }
 }
