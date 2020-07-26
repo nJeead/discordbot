@@ -38,7 +38,7 @@ module.exports = {
 
             for(const i of calendars.data.items){                   // populates Embedded message with calendars
                 if(!i.summary.includes("utecediscord@gmail.com")){
-                    result.addField("----------------------------", i.summary);
+                    result.addField(`-----**${i.summary}**-----`, i.description);
                 }
             }
             message.channel.send(result);
